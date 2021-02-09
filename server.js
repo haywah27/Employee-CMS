@@ -14,6 +14,83 @@ const connection = mysql.createConnection({
   database: 'company_hw',
 });
 
+//////////////////////////
+
+const initialPrompt = [
+    {
+        type: "list",
+        message: "Would you like to do?",
+        choices: ["View All Employees", "View Departments", "View Roles", "Add Employee", "Add Department", "Add Role", "Update Employee", "Quit Application"],
+        name: "initPrompt"
+    }
+];
+
+const addEmployee = [
+    {
+        type: "input",
+        message: "What is their first name?",
+        name: "firstName",
+      },
+      {
+        type: "input",
+        message: "What is their last name?",
+        name: "lastName",
+      },
+      {
+        type: "list",
+        message: "What is their role?",
+        choices: "",
+        name: "role",
+      },
+      {
+        type: "list",
+        message: "Who is their manager?",
+        choices: "",
+        name: "manager"
+      }
+];
+
+
+function init(){
+    inquirer.prompt(initialPrompt).then(
+        response => {
+            console.log(response);
+            switch (response.initPrompt) {
+                case ("View All Employees"):
+                    viewEmployee();
+                    break;
+                case ("View Departments"):
+                    viewDepartment();
+                    break;
+                case ("View Roles"):
+                    viewRole();
+                    break;
+                case ("Add Employee"):
+                    addEmployee();
+                    break;
+                case ("Add Role"):
+                    addRole();
+                    break;
+                case ("Update Employee"):
+                    updateEmployee();
+                    break;
+                case ("Quit Application"):
+                    connection.end();
+                    break;
+            }
+           
+        });
+}
+
+function addEmployee(){
+    inquirer.prompt(initialQuest).then(
+        response => {
+            console.log(response);
+            
+            init();
+        });
+}
+
 
 
 const readProducts = () => {

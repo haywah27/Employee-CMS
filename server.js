@@ -1,4 +1,6 @@
 const mysql = require('mysql');
+const inquirer = require("inquirer");
+// const express = require("inquirer");
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -25,7 +27,7 @@ const initialPrompt = [
     }
 ];
 
-const addEmployee = [
+const createEmployee = [
     {
         type: "input",
         message: "What is their first name?",
@@ -39,13 +41,13 @@ const addEmployee = [
       {
         type: "list",
         message: "What is their role?",
-        choices: "",
+        choices: ["hot dog eater", "monster", "queen"],
         name: "role",
       },
       {
         type: "list",
         message: "Who is their manager?",
-        choices: "",
+        choices: ["Billie", "yo momma", "Beyonce"],
         name: "manager"
       }
 ];
@@ -83,7 +85,7 @@ function init(){
 }
 
 function addEmployee(){
-    inquirer.prompt(initialQuest).then(
+    inquirer.prompt(createEmployee).then(
         response => {
             console.log(response);
             
@@ -98,8 +100,8 @@ const readProducts = () => {
   connection.query('SELECT * FROM roles', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
-    connection.end();
+    // console.log(res);
+    init();
   });
 };
 

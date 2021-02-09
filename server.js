@@ -62,10 +62,10 @@ function init(){
                     readEmployees();
                     break;
                 case ("View Departments"):
-                    viewDepartment();
+                    viewDepartments();
                     break;
                 case ("View Roles"):
-                    viewRole();
+                    viewRoles();
                     break;
                 case ("Add Employee"):
                     addEmployee();
@@ -114,6 +114,28 @@ const readEmployees = () => {
     console.log("/////////////////////////////");
     init();
   });
+};
+
+const viewDepartments = () => {
+    console.log('Selecting all departments...\n');
+    connection.query('SELECT * FROM departments', (err, res) => {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+      console.log("/////////////////////////////");
+      init();
+    });
+};
+
+const viewRoles = () => {
+    console.log('Selecting all roles...\n');
+    connection.query('SELECT * FROM roles', (err, res) => {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+      console.log("/////////////////////////////");
+      init();
+    });
 };
 
 // const createEmployee = () => {

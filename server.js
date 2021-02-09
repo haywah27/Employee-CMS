@@ -27,7 +27,7 @@ const initialPrompt = [
     }
 ];
 
-const createEmployee = [
+const EmployeeData = [
     {
         type: "input",
         message: "What is their first name?",
@@ -59,7 +59,7 @@ function init(){
             console.log(response);
             switch (response.initPrompt) {
                 case ("View All Employees"):
-                    viewEmployee();
+                    readEmployees();
                     break;
                 case ("View Departments"):
                     viewDepartment();
@@ -84,26 +84,60 @@ function init(){
         });
 }
 
+
+// function viewEmployees(){
+//     inquirer.prompt(EmployeeData).then(
+//         response => {
+//             console.log(response);
+//             readEmployee();
+//         });
+// }
+
+
 function addEmployee(){
-    inquirer.prompt(createEmployee).then(
+    inquirer.prompt(EmployeeData).then(
         response => {
             console.log(response);
-            
+            // createEmployee();
             init();
         });
 }
 
 
 
-const readProducts = () => {
-  console.log('Selecting all products...\n');
-  connection.query('SELECT * FROM roles', (err, res) => {
+const readEmployees = () => {
+  console.log('Selecting all employees...\n');
+  connection.query('SELECT * FROM employees', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    // console.log(res);
+    console.log(res);
+    console.log("/////////////////////////////");
     init();
   });
 };
+
+// const createEmployee = () => {
+//     console.log('Inserting a new product...\n');
+//     const query = connection.query(
+//       'INSERT INTO products SET ?',
+//       {
+//         flavor: 'Rocky Road',
+//         price: 3.0,
+//         quantity: 50,
+//       },
+//       (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} product inserted!\n`);
+//         // Call updateProduct AFTER the INSERT completes
+//         updateProduct();
+//       }
+//     );
+  
+//     // logs the actual query being run
+//     console.log(query.sql);
+//   };
+
+
 
 // const deleteProduct = () => {
 //   console.log('Deleting all strawberry icecream...\n');
@@ -145,30 +179,10 @@ const readProducts = () => {
 //   console.log(query.sql);
 // };
 
-// const createProduct = () => {
-//   console.log('Inserting a new product...\n');
-//   const query = connection.query(
-//     'INSERT INTO products SET ?',
-//     {
-//       flavor: 'Rocky Road',
-//       price: 3.0,
-//       quantity: 50,
-//     },
-//     (err, res) => {
-//       if (err) throw err;
-//       console.log(`${res.affectedRows} product inserted!\n`);
-//       // Call updateProduct AFTER the INSERT completes
-//       updateProduct();
-//     }
-//   );
-
-//   // logs the actual query being run
-//   console.log(query.sql);
-// };
 
 // Connect to the DB
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}\n`);
-  readProducts();
+  readEmployees();
 });

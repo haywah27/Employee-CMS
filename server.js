@@ -99,7 +99,7 @@ function addEmployee(){
         response => {
             console.log(response);
             const firstName = response.firstName;
-            const lastName = response.lasttName;
+            const lastName = response.lastName;
             const role = response.role;
             const manager = response.manager;
             let roleID = 0;
@@ -179,7 +179,8 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee inserted!\n`);
         // Call updateProduct AFTER the INSERT completes
-        updateProduct();
+        // updateEmployee(firstName, lastName, roleID, managerID);
+        init();
       }
     );
   
@@ -188,6 +189,35 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
   };
 
 
+
+// const updateEmployee = (firstName, lastName, roleID, managerID) => {
+//     console.log('Updating new employee data...\n');
+//     const query = connection.query(
+//     'UPDATE employees SET ? WHERE ?',
+//     [
+//         {
+//             first_name: `${firstName}`,
+//         },
+//         {
+//             last_name: `${lastName}`,
+//         },
+//         {
+//             role_ID: `${roleID}`,
+//         },
+//         {
+//             manager_ID: `${managerID}`,
+//         },
+//     ],
+//     (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} employee table updated!\n`);
+//         // Call deleteProduct AFTER the UPDATE completes
+//     }
+//     );
+
+//     // logs the actual query being run
+//     console.log(query.sql);
+// };
   
 
 
@@ -208,14 +238,6 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
 // };
 
 
-const readEmployees = () => {
-    console.log('Selecting all employees...\n');
-    connection.query('SELECT * FROM employees', (err, res) => {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-      init();
-    });
-  };
 
 
 // Connect to the DB

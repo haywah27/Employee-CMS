@@ -59,7 +59,7 @@ function init(){
             console.log(response);
             switch (response.initPrompt) {
                 case ("View All Employees"):
-                    readEmployees();
+                    viewEmployees();
                     break;
                 case ("View Departments"):
                     viewDepartments();
@@ -98,14 +98,41 @@ function addEmployee(){
     inquirer.prompt(EmployeeData).then(
         response => {
             console.log(response);
-            // createEmployee();
+            const firstName = response.firstName;
+            const lastName = response.lasttName;
+            const role = response.role;
+            const manager = response.manager;
+            let roleID = 0;
+            
+            if (role === "hot dog eater"){
+                roleID = 1;
+            } else if (role === "monster"){
+                roleID = 2;
+            } else if (role === "queen"){
+                roleID = 3;
+            } else {
+                console.log("invalid role");
+            }
+
+            let managerID = 0;
+            if (manager === "Billie"){
+                managerID = 1;
+            } else if (manager === "yo momma"){
+                managerID = 2;
+            } else if (manager === "Beyonce"){
+                managerID = 3;
+            } else {
+                console.log("invalid role");
+            }
+
+            createEmployee(firstName, lastName, roleID, managerID);
             init();
         });
 }
 
 
 
-const readEmployees = () => {
+const viewEmployees = () => {
   console.log('Selecting all employees...\n');
   connection.query('SELECT * FROM employees', (err, res) => {
     if (err) throw err;
@@ -138,27 +165,30 @@ const viewRoles = () => {
     });
 };
 
-// const createEmployee = () => {
-//     console.log('Inserting a new product...\n');
-//     const query = connection.query(
-//       'INSERT INTO products SET ?',
-//       {
-//         flavor: 'Rocky Road',
-//         price: 3.0,
-//         quantity: 50,
-//       },
-//       (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} product inserted!\n`);
-//         // Call updateProduct AFTER the INSERT completes
-//         updateProduct();
-//       }
-//     );
+const createEmployee = (firstName, lastName, roleID, managerID) => {
+    console.log('Inserting a new employee...\n');
+    const query = connection.query(
+      'INSERT INTO employees SET ?',
+      {
+        first_name: `${firstName}`,
+        last_name: `${lastName}`,
+        role_id: `${roleID}`,
+        manager_id: `${managerID}`
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} employee inserted!\n`);
+        // Call updateProduct AFTER the INSERT completes
+        updateProduct();
+      }
+    );
   
-//     // logs the actual query being run
-//     console.log(query.sql);
-//   };
+    // logs the actual query being run
+    console.log(query.sql);
+  };
 
+
+  
 
 
 // const deleteProduct = () => {
@@ -177,34 +207,20 @@ const viewRoles = () => {
 //   );
 // };
 
-// const updateProduct = () => {
-//   console.log('Updating all Rocky Road quantities...\n');
-//   const query = connection.query(
-//     'UPDATE products SET ? WHERE ?',
-//     [
-//       {
-//         quantity: 100,
-//       },
-//       {
-//         flavor: 'Rocky Road',
-//       },
-//     ],
-//     (err, res) => {
-//       if (err) throw err;
-//       console.log(`${res.affectedRows} products updated!\n`);
-//       // Call deleteProduct AFTER the UPDATE completes
-//       deleteProduct();
-//     }
-//   );
 
-//   // logs the actual query being run
-//   console.log(query.sql);
-// };
+const readEmployees = () => {
+    console.log('Selecting all employees...\n');
+    connection.query('SELECT * FROM employees', (err, res) => {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      init();
+    });
+  };
 
 
 // Connect to the DB
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}\n`);
-  readEmployees();
+  viewEmployees();
 });

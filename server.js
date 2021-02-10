@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const inquirer = require("inquirer");
+const cTable = require('console.table');
 // const express = require("inquirer");
 
 const connection = mysql.createConnection({
@@ -27,7 +28,7 @@ const initialPrompt = [
     }
 ];
 
-const EmployeeData = [
+const employeeData = [
     {
         type: "input",
         message: "What is their first name?",
@@ -41,22 +42,43 @@ const EmployeeData = [
       {
         type: "list",
         message: "What is their role?",
-        choices: ["hot dog eater", "monster", "queen"],
+        choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"],
         name: "role",
       },
       {
         type: "list",
         message: "Who is their manager?",
-        choices: ["Billie", "yo momma", "Beyonce"],
+        choices: [" ", "Billie", "yo momma", "Beyonce"],
         name: "manager"
       }
 ];
+
+const departData = [
+    {
+        type: "input",
+        message: "What department would you like to add?",
+        name: "newDepartment"
+    }
+]
+
+const roleData = [
+    {
+        type: "input",
+        message: "What role would you like to add?",
+        name: "newRole"
+    },
+    {
+        type: "input",
+        message: "What salary does this role earn?",
+        name: "newRole"
+    }
+]
 
 
 function init(){
     inquirer.prompt(initialPrompt).then(
         response => {
-            console.log(response);
+            console.log("you chose the option: ", response.initPrompt);
             switch (response.initPrompt) {
                 case ("View All Employees"):
                     viewEmployees();
@@ -86,7 +108,7 @@ function init(){
 
 
 // function viewEmployees(){
-//     inquirer.prompt(EmployeeData).then(
+//     inquirer.prompt(employeeData).then(
 //         response => {
 //             console.log(response);
 //             readEmployee();
@@ -95,7 +117,51 @@ function init(){
 
 
 function addEmployee(){
-    inquirer.prompt(EmployeeData).then(
+    inquirer.prompt(employeeData).then(
+        response => {
+            console.log(response);
+            const firstName = response.firstName;
+            const lastName = response.lastName;
+            const role = response.role;
+            const manager = response.manager;
+            let roleID;
+            
+            if (role === "Sales Lead"){
+                roleID = 1;
+            } else if (role === "Salesperson"){
+                roleID = 2;
+            } else if (role === "Lead Engineer"){
+                roleID = 3;
+            } else if (role === "Software Engineer"){
+                roleID = 4;
+            } else if (role === "Accountant"){
+                roleID = 5;
+            } else if (role === "Legal Team Lead"){
+                roleID = 6;
+            } else if (role === "Lawyer"){
+                roleID = 7;
+            } else {
+                roleID = NULL;
+            }
+
+            let managerID;
+            if (manager === "Billie"){
+                managerID++;
+            } else if (manager === "yo momma"){
+                managerID++;
+            } else if (manager === "Beyonce"){
+                managerID++;
+            } else {
+                managerID = "NULL";
+            }
+
+            createEmployee(firstName, lastName, roleID, managerID);
+            init();
+        });
+}
+
+function addDepartment(){
+    inquirer.prompt(departData).then(
         response => {
             console.log(response);
             const firstName = response.firstName;
@@ -137,7 +203,7 @@ const viewEmployees = () => {
   connection.query('SELECT * FROM employees', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.log(res);
+    console.table(res);
     console.log("/////////////////////////////");
     init();
   });
@@ -148,7 +214,7 @@ const viewDepartments = () => {
     connection.query('SELECT * FROM departments', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
-      console.log(res);
+      console.table(res);
       console.log("/////////////////////////////");
       init();
     });
@@ -159,34 +225,33 @@ const viewRoles = () => {
     connection.query('SELECT * FROM roles', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
-      console.log(res);
+      console.table(res);
       console.log("/////////////////////////////");
       init();
     });
 };
 
-const createEmployee = (firstName, lastName, roleID, managerID) => {
-    console.log('Inserting a new employee...\n');
-    const query = connection.query(
-      'INSERT INTO employees SET ?',
-      {
-        first_name: `${firstName}`,
-        last_name: `${lastName}`,
-        role_id: `${roleID}`,
-        manager_id: `${managerID}`
-      },
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} employee inserted!\n`);
-        // Call updateProduct AFTER the INSERT completes
-        // updateEmployee(firstName, lastName, roleID, managerID);
-        init();
-      }
-    );
+// const createEmployee = (firstName, lastName, roleID, managerID) => {
+//     console.log('Inserting a new employee...\n');
+//     connection.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
+//       [
+//         first_name: `${firstName}`,
+//         last_name: `${lastName}`,
+//         role_id: `${roleID}`,
+//         manager_id: `${managerID}`
+//       ],
+//       (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} employee inserted!\n`);
+//         // Call updateProduct AFTER the INSERT completes
+//         // updateEmployee(firstName, lastName, roleID, managerID);
+//         init();
+//       }
+//     );
   
-    // logs the actual query being run
-    console.log(query.sql);
-  };
+//     // logs the actual query being run
+//     console.log(query.sql);
+//   };
 
 
 
@@ -244,5 +309,5 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}\n`);
-  viewEmployees();
+  init();
 });

@@ -48,7 +48,7 @@ const employeeData = [
       {
         type: "list",
         message: "Who is their manager?",
-        choices: [" ", "Billie", "yo momma", "Beyonce"],
+        choices: ["None", "Billie", "yo momma", "Beyonce"],
         name: "manager"
       }
 ];
@@ -210,12 +210,31 @@ const viewRoles = () => {
 
 const createEmployee = (firstName, lastName, roleID, managerID) => {
     console.log('Inserting a new employee...\n');
+    if (managerID === "NULL"){
+
+        connection.query('INSERT INTO employees SET ?',
+        {
+          first_name: `${firstName}`,
+          last_name: `${lastName}`,
+          role_id: `${roleID}`,
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log(`${res.affectedRows} employee inserted!\n`);
+          // Call updateProduct AFTER the INSERT completes
+          updateEmployee(firstName, lastName, roleID, managerID);
+          init();
+        }
+      );
+  
+    } else {
+    
     connection.query('INSERT INTO employees SET ?',
       {
         first_name: `${firstName}`,
         last_name: `${lastName}`,
         role_id: `${roleID}`,
-        manager_id: `${managerID}`
+        manager_id: `${managerID}`,
       },
       (err, res) => {
         if (err) throw err;
@@ -225,7 +244,7 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
         init();
       }
     );
-  
+    }
     // logs the actual query being run
     console.log(query.sql);
   };
@@ -263,7 +282,7 @@ const updateEmployee = (firstName, lastName, roleID, managerID) => {
 
 function createDept(dept) {
     console.log('Inserting a new department...\n');
-    
+
     connection.query('INSERT INTO departments SET ?',
       {
         name: `${dept}`,

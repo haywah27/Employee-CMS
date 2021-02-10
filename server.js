@@ -146,11 +146,11 @@ function addEmployee(){
 
             let managerID;
             if (manager === "Billie"){
-                managerID++;
+                managerID = 1;
             } else if (manager === "yo momma"){
-                managerID++;
+                managerI = 2;
             } else if (manager === "Beyonce"){
-                managerID++;
+                managerID = 3;
             } else {
                 managerID = "NULL";
             }
@@ -164,37 +164,14 @@ function addDepartment(){
     inquirer.prompt(departData).then(
         response => {
             console.log(response);
-            const firstName = response.firstName;
-            const lastName = response.lastName;
-            const role = response.role;
-            const manager = response.manager;
-            let roleID = 0;
-            
-            if (role === "hot dog eater"){
-                roleID = 1;
-            } else if (role === "monster"){
-                roleID = 2;
-            } else if (role === "queen"){
-                roleID = 3;
-            } else {
-                console.log("invalid role");
-            }
+            const dept = response.newDepartment;
 
-            let managerID = 0;
-            if (manager === "Billie"){
-                managerID = 1;
-            } else if (manager === "yo momma"){
-                managerID = 2;
-            } else if (manager === "Beyonce"){
-                managerID = 3;
-            } else {
-                console.log("invalid role");
-            }
-
-            createEmployee(firstName, lastName, roleID, managerID);
+            createDept(dept);
             init();
         });
 }
+
+
 
 
 
@@ -231,58 +208,92 @@ const viewRoles = () => {
     });
 };
 
-// const createEmployee = (firstName, lastName, roleID, managerID) => {
-//     console.log('Inserting a new employee...\n');
-//     connection.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)',
-//       [
-//         first_name: `${firstName}`,
-//         last_name: `${lastName}`,
-//         role_id: `${roleID}`,
-//         manager_id: `${managerID}`
-//       ],
-//       (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} employee inserted!\n`);
-//         // Call updateProduct AFTER the INSERT completes
-//         // updateEmployee(firstName, lastName, roleID, managerID);
-//         init();
-//       }
-//     );
+const createEmployee = (firstName, lastName, roleID, managerID) => {
+    console.log('Inserting a new employee...\n');
+    connection.query('INSERT INTO employees SET ?',
+      {
+        first_name: `${firstName}`,
+        last_name: `${lastName}`,
+        role_id: `${roleID}`,
+        manager_id: `${managerID}`
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} employee inserted!\n`);
+        // Call updateProduct AFTER the INSERT completes
+        updateEmployee(firstName, lastName, roleID, managerID);
+        init();
+      }
+    );
   
-//     // logs the actual query being run
-//     console.log(query.sql);
-//   };
+    // logs the actual query being run
+    console.log(query.sql);
+  };
 
 
 
-// const updateEmployee = (firstName, lastName, roleID, managerID) => {
-//     console.log('Updating new employee data...\n');
-//     const query = connection.query(
-//     'UPDATE employees SET ? WHERE ?',
-//     [
-//         {
-//             first_name: `${firstName}`,
-//         },
-//         {
-//             last_name: `${lastName}`,
-//         },
-//         {
-//             role_ID: `${roleID}`,
-//         },
-//         {
-//             manager_ID: `${managerID}`,
-//         },
-//     ],
-//     (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} employee table updated!\n`);
-//         // Call deleteProduct AFTER the UPDATE completes
-//     }
-//     );
+const updateEmployee = (firstName, lastName, roleID, managerID) => {
+    console.log('Updating new employee data...\n');
+    const query = connection.query(
+    'UPDATE employees SET ? WHERE ?',
+    [
+        {
+            first_name: `${firstName}`,
+        },
+        {
+            last_name: `${lastName}`,
+        },
+        {
+            role_ID: `${roleID}`,
+        },
+        {
+            manager_ID: `${managerID}`,
+        },
+    ],
+    (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} employee table updated!\n`);
+        // Call deleteProduct AFTER the UPDATE completes
+    }
+    );
 
-//     // logs the actual query being run
-//     console.log(query.sql);
-// };
+    // logs the actual query being run
+    console.log(query.sql);
+};
+
+function createDept(dept) {
+    console.log('Inserting a new department...\n');
+    
+    connection.query('INSERT INTO departments SET ?',
+      {
+        name: `${dept}`,
+      },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} department inserted!\n`);
+        // Call updateProduct AFTER the INSERT completes
+        updateDept(dept);
+        init();
+      }
+    );
+}
+
+function updateDept(dept) {
+    console.log('Updating new department data...\n');
+    const query = connection.query(
+    'UPDATE employees SET ? WHERE ?',
+    [
+        {
+            name: `${dept}`,
+        },
+    ],
+    (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} department table updated!\n`);
+        // Call deleteProduct AFTER the UPDATE completes
+    }
+    );
+}
   
 
 

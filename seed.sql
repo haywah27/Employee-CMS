@@ -24,7 +24,12 @@ CREATE TABLE employees (
   role_id INT NOT NULL,
   manager_id INT,
   PRIMARY KEY (id)
+);
 
+CREATE TABLE managers (
+  id INT AUTO_INCREMENT NOT NULL,
+  manager_name VARCHAR(30) NOT NULL,
+  PRIMARY KEY (id)
 );
 
 INSERT INTO departments (department)
@@ -69,8 +74,14 @@ VALUES ("Walrus", "Monster", 1);
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES ("Billie", "Farthead", 2, 1);
 
+INSERT INTO managers (manager_name)
+VALUES ("Hayley Wahlroos");
+
 -- show roles table with department name instead of ID
 SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;
 
 -- show employees with roles and department names instead of ID numbers
-SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary  FROM employees INNER JOIN roles ON roles.id = employees.role_id;
+SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_name 
+FROM employees INNER JOIN roles ON roles.id = employees.role_id
+INNER JOIN departments ON departments.id = roles.department_id
+LEFT JOIN managers ON managers.id = employees.manager_id;

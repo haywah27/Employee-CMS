@@ -107,8 +107,9 @@ const viewEmployees = () => {
   connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_first_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
-    console.table(res);
-    console.log("/////////////////////////////");
+    console.log("///////////////////////////////////////////////////////////////////////////////////////");
+    console.table("\n", res);
+    console.log("///////////////////////////////////////////////////////////////////////////////////////");
     init();
   });
 };
@@ -120,8 +121,9 @@ const viewDepartments = () => {
     connection.query('SELECT * FROM departments', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
-      console.table(res);
-      console.log("/////////////////////////////");
+      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      console.table("\n", res);
+      console.log("///////////////////////////////////////////////////////////////////////////////////////");
       init();
     });
 };
@@ -133,8 +135,10 @@ const viewRoles = () => {
     connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
+      console.log("///////////////////////////////////////////////////////////////////////////////////////");
       console.table("\n", res);
-      console.log("/////////////////////////////");
+      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      
       init();
     });
 };
@@ -236,7 +240,6 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee inserted!\n`);
         // Call updateProduct AFTER the INSERT completes
-        updateEmployee(firstName, lastName, depIDArr, managerID);
         init();
       }
     );
@@ -246,35 +249,36 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
   };
 
 
+        // updateEmployee(firstName, lastName, depIDArr, managerID);
 
-const updateEmployee = (firstName, lastName, depIDArr, managerID) => {
-    console.log('Updating new employee data...\n');
-    const query = connection.query(
-    'UPDATE employees SET ? WHERE ?',
-    [
-        {
-            first_name: `${firstName}`,
-        },
-        {
-            last_name: `${lastName}`,
-        },
-        {
-            role_ID: `${depIDArr}`,
-        },
-        {
-            manager_ID: `${managerID}`,
-        },
-    ],
-    (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} employee table updated!\n`);
-        // Call deleteProduct AFTER the UPDATE completes
-    }
-    );
+// const updateEmployee = (firstName, lastName, depIDArr, managerID) => {
+//     console.log('Updating new employee data...\n');
+//     const query = connection.query(
+//     'UPDATE employees SET ? WHERE ?',
+//     [
+//         {
+//             first_name: `${firstName}`,
+//         },
+//         {
+//             last_name: `${lastName}`,
+//         },
+//         {
+//             role_ID: `${depIDArr}`,
+//         },
+//         {
+//             manager_ID: `${managerID}`,
+//         },
+//     ],
+//     (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} employee table updated!\n`);
+//         // Call deleteProduct AFTER the UPDATE completes
+//     }
+//     );
 
-    // logs the actual query being run
-    console.log(query.sql);
-};
+//     // logs the actual query being run
+//     console.log(query.sql);
+// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -282,10 +286,11 @@ function addDepartment(){
     inquirer.prompt(departData).then(
         response => {
             console.log(response);
-            const dept = response.newDepartment;
+            const dept = JSON.stringify(response.newDepartment);
 
             createDept(dept);
-            init();
+            // console.log(response.newDepartment);
+
         });
 }
 
@@ -294,36 +299,36 @@ function createDept(dept) {
 
     connection.query('INSERT INTO departments SET ?',
       {
-        name: `${dept}`,
+        department: `${dept}`,
       },
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} department inserted!\n`);
         // Call updateProduct AFTER the INSERT completes
-        updateDept(dept);
+        // updateDept(dept);
         init();
       }
     );
 }
 
-function updateDept(dept) {
-    console.log('Updating new department data...\n');
-    const query = connection.query(
-    'UPDATE employees SET ? WHERE ?',
-    [
-        {
-            name: `${dept}`,
-        },
-    ],
-    (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} department table updated!\n`);
-        // Call deleteProduct AFTER the UPDATE completes
-    }
-    );
-}
-  
 
+// const updateDept = (dept)  => {
+//     console.log('Updating new department data...\n');
+//     const query = connection.query(
+//     'UPDATE departments SET ?',
+//     [
+//         {
+//             department: `${dept}`,
+//         },
+//     ],
+//     (err, res) => {
+//         if (err) throw err;
+//         console.log(`${res.affectedRows} department table updated!\n`);
+//         // Call deleteProduct AFTER the UPDATE completes
+//     }
+//     );
+// }
+  
 
 // const deleteProduct = () => {
 //   console.log('Deleting all strawberry icecream...\n');

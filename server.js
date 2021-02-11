@@ -1,15 +1,10 @@
 const mysql = require('mysql');
 const inquirer = require("inquirer");
 const cTable = require('console.table');
-// const express = require("inquirer");
 
 const connection = mysql.createConnection({
   host: 'localhost',
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: 'root',
 
   // Be sure to update with your own MySQL password!
@@ -28,68 +23,13 @@ const initialPrompt = [
     }
 ];
 
-
-let roleArr = [];
-function readRoles() {
-    console.log('Selecting titles roles...\n');
-    connection.query('SELECT title FROM roles', (err, res) => {
-      if (err) throw err;
-      var roles = res.map(function(item){
-        return item['title']
-    })
-        for (let i = 0; i < roles.length; i++){
-            roleArr.push(roles[i]);
-        }
-
-        
-      return roleArr;
-        console.log(roleArr);
-        // var result = JSON.parse(JSON.stringify(res))
-
-    //   let poop = 
-      
-
-    //   console.log(roleArr);
-    });
-  };
-
-
-
-// const employeeData = [
-//     {
-//         type: "input",
-//         message: "What is their first name?",
-//         name: "firstName",
-//       },
-//       {
-//         type: "input",
-//         message: "What is their last name?",
-//         name: "lastName",
-//       },
-//       {
-//         type: "list",
-//         message: "What is their role?",
-//         choices: readRoles(),
-//         name: "role",
-//       },
-//     //   "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"
-//       {
-//         type: "list",
-//         message: "Who is their manager?",
-//         choices: ["Hayley", "Billie", "Aspen",],
-//         name: "manager"
-//       }
-// ];
-
-
-// "Billie", "Hayley", "Oscar", "Aspen"
 const departData = [
     {
         type: "input",
         message: "What department would you like to add?",
         name: "newDepartment"
     }
-]
+];
 
 const roleData = [
     {
@@ -102,7 +42,27 @@ const roleData = [
         message: "What salary does this role earn?",
         name: "newRole"
     }
-]
+];
+
+
+let roleArr = [];
+function readRoles() {
+    console.log('Selecting titles roles...\n');
+    connection.query('SELECT title FROM roles', (err, res) => {
+        if (err) throw err;
+
+        var roles = res.map(function(item){
+            return item['title']
+        });
+
+        for (let i = 0; i < roles.length; i++){
+            roleArr.push(roles[i]);
+        }
+
+        return roleArr;
+
+    });
+};
 
 
 function init(){
@@ -124,6 +84,9 @@ function init(){
                 case ("Add Employee"):
                     addEmployee();
                     break;
+                case ("Add Department"):
+                    addDepartment();
+                    break;
                 case ("Add Role"):
                     addRole();
                     break;
@@ -137,54 +100,51 @@ function init(){
            
         });
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// function viewEmployees(){
-//     inquirer.prompt(employeeData).then(
-//         response => {
-//             console.log(response);
-//             readEmployee();
-//         });
-// }
-let roleID = []
-let depIDArr = 0;
-
-function poop(){
-    // connection.query('SELECT * FROM roles', (err, res) => {
-    // if (err) throw err;
-    // let poop = JSON.parse(JSON.stringify(res));
-   
-    // for (let i = 0; i < poop.length; i++){
-    //     if ("Sales Lead" == poop[i].title){
-    //         roleID.push(poop[i].department_id)
-           
-    //     }
-        
-    // }
-
-    connection.query(`SELECT * FROM roles WHERE title = "Sales Lead"`, (err, res) => {
-        if (err) throw err;
-        let poop = JSON.parse(JSON.stringify(res));
-
-        depIDArr = depIDArr += poop[0].department_id;
-
-        console.log("he", depIDArr)
-
-        // console.log(poop[0].title)
-
-    
-    
-
+const viewEmployees = () => {
+  console.log('Selecting all employees...\n');
+  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_first_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
+    if (err) throw err;
+    // Log all results of the SELECT statement
+    console.table(res);
+    console.log("/////////////////////////////");
+    init();
   });
-}
+};
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let randomShit = [];
+const viewDepartments = () => {
+    console.log('Selecting all departments...\n');
+    connection.query('SELECT * FROM departments', (err, res) => {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.table(res);
+      console.log("/////////////////////////////");
+      init();
+    });
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const viewRoles = () => {
+    console.log('Selecting all roles...\n');
+    connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.table("\n", res);
+      console.log("/////////////////////////////");
+      init();
+    });
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let depIDArr = 0;
 function addEmployee(){
-    // console.log(typeof roleArr);
     readRoles();
-    // poop()
-    
+
     inquirer.prompt([{
         type: "input",
         message: "What is their first name?",
@@ -201,7 +161,6 @@ function addEmployee(){
         choices: roleArr,
         name: "role",
       },
-    //   "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"
       {
         type: "list",
         message: "Who is their manager?",
@@ -215,10 +174,9 @@ function addEmployee(){
             const lastName = response.lastName;
             let roleID = response.role;
             let managerID = response.manager;
-            // depIDArr = 0;
-            yoMom(roleID, depIDArr);
-            // randomShit.push(roleID);
-            function yoMom(roleID, depIDArr){
+            converRoleToNum(roleID, depIDArr);
+
+            function converRoleToNum(roleID, depIDArr){
                 connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
                     if (err) throw err;
                     let poop = JSON.parse(JSON.stringify(res));
@@ -245,53 +203,6 @@ function addEmployee(){
         });
 }
 
-function addDepartment(){
-    inquirer.prompt(departData).then(
-        response => {
-            console.log(response);
-            const dept = response.newDepartment;
-
-            createDept(dept);
-            init();
-        });
-}
-
-
-
-
-
-const viewEmployees = () => {
-  console.log('Selecting all employees...\n');
-  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_first_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
-    if (err) throw err;
-    // Log all results of the SELECT statement
-    console.table(res);
-    console.log("/////////////////////////////");
-    init();
-  });
-};
-
-const viewDepartments = () => {
-    console.log('Selecting all departments...\n');
-    connection.query('SELECT * FROM departments', (err, res) => {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-      console.table(res);
-      console.log("/////////////////////////////");
-      init();
-    });
-};
-
-const viewRoles = () => {
-    console.log('Selecting all roles...\n');
-    connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
-      if (err) throw err;
-      // Log all results of the SELECT statement
-      console.table("\n", res);
-      console.log("/////////////////////////////");
-      init();
-    });
-};
 
 const createEmployee = (firstName, lastName, depIDArr, managerID) => {
     console.log('Inserting a new employee...\n');
@@ -365,6 +276,19 @@ const updateEmployee = (firstName, lastName, depIDArr, managerID) => {
     console.log(query.sql);
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function addDepartment(){
+    inquirer.prompt(departData).then(
+        response => {
+            console.log(response);
+            const dept = response.newDepartment;
+
+            createDept(dept);
+            init();
+        });
+}
+
 function createDept(dept) {
     console.log('Inserting a new department...\n');
 
@@ -416,8 +340,6 @@ function updateDept(dept) {
 //     }
 //   );
 // };
-
-
 
 
 // Connect to the DB

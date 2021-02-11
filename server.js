@@ -223,25 +223,13 @@ function addEmployee(){
                     if (err) throw err;
                     let poop = JSON.parse(JSON.stringify(res));
             
-                    depIDArr = parseInt(poop[0].department_id);
-                    // res[0].department_id
+                    depIDArr = poop[0].department_id;
             
-                    console.log("he", poop[0].department_id)
-
-                    // return depIDArr;
-            
-                    // console.log(poop[0].title)
-            
-                
-                
-            
+                    console.log("he", depIDArr)
+                    createEmployee(firstName, lastName, depIDArr, managerID);
               });
             }
             
-
-
-
-
             if (managerID === "Hayley"){
                 managerID = 1;
             } else if (managerID === "Billie"){
@@ -252,7 +240,7 @@ function addEmployee(){
                 managerID = "NULL";
             }
 
-            createEmployee(firstName, lastName, depIDArr, managerID);
+            
             init();
         });
 }
@@ -299,7 +287,7 @@ const viewRoles = () => {
     connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
-      console.table(res);
+      console.table("\n", res);
       console.log("/////////////////////////////");
       init();
     });

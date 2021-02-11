@@ -73,3 +73,4 @@ VALUES ("Billie", "Farthead", 2, 1);
 SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;
 
 -- show employees with roles and department names instead of ID numbers
+SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary  FROM employees INNER JOIN roles ON roles.id = employees.role_id;

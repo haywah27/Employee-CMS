@@ -40,7 +40,7 @@ const roleData = [
     {
         type: "input",
         message: "What salary does this role earn?",
-        name: "newRole"
+        name: "newSalary"
     }
 ];
 
@@ -51,12 +51,31 @@ function readRoles() {
     connection.query('SELECT title FROM roles', (err, res) => {
         if (err) throw err;
 
-        var roles = res.map(function(item){
+        const roles = res.map(function(item){
             return item['title']
         });
 
         for (let i = 0; i < roles.length; i++){
             roleArr.push(roles[i]);
+        }
+
+        return roleArr;
+
+    });
+};
+
+let deptArr = [];
+function readDepts() {
+    console.log('Selecting department names...\n');
+    connection.query('SELECT department FROM departments', (err, res) => {
+        if (err) throw err;
+
+        const depts = res.map(function(item){
+            return item['department']
+        });
+
+        for (let i = 0; i < depts.length; i++){
+            deptArr.push(depts[i]);
         }
 
         return roleArr;
@@ -183,9 +202,9 @@ function addEmployee(){
             function converRoleToNum(roleID, depIDArr){
                 connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
                     if (err) throw err;
-                    let poop = JSON.parse(JSON.stringify(res));
+                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
             
-                    depIDArr = poop[0].department_id;
+                    depIDArr = roleValueToDeptID[0].department_id;
             
                     console.log("he", depIDArr)
                     createEmployee(firstName, lastName, depIDArr, managerID);
@@ -222,7 +241,7 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
           if (err) throw err;
           console.log(`${res.affectedRows} employee inserted!\n`);
           // Call updateProduct AFTER the INSERT completes
-          updateEmployee(firstName, lastName, depIDArr, managerID);
+        //   updateEmployee(firstName, lastName, depIDArr, managerID);
           init();
         }
       );
@@ -306,6 +325,75 @@ function createDept(dept) {
         console.log(`${res.affectedRows} department inserted!\n`);
         // Call updateProduct AFTER the INSERT completes
         // updateDept(dept);
+        init();
+      }
+    );
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function addRole(){
+    readDepts();
+    inquirer.prompt(
+    [
+        {
+            type: "input",
+            message: "What role would you like to add?",
+            name: "newRole"
+        },
+        {
+            type: "input",
+            message: "What salary does this role earn?",
+            name: "newSalary"
+        },
+        {
+            type: "list",
+            message: "What department does this role belong to?",
+            choices: deptArr,
+            name: "roleDeptID"
+        }
+
+    ]).then(
+        response => {
+            
+            console.log(response);
+            const roleTitle = response.newRole;
+            const roleSalary = response.newSalary;
+            let roleID = response.roleDeptID;
+            findDeptID(roleID, depIDArr);
+
+            function findDeptID(roleID, depIDArr){
+                connection.query(("SELECT * FROM departments WHERE department = " + "'" + roleID + "'"), (err, res) => {
+                    if (err) throw err;
+                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+            
+                    depIDArr = roleValueToDeptID[0].id;
+            
+                    console.log("he", depIDArr)
+                    createRole(roleTitle, roleSalary, depIDArr);
+              });
+            }
+            
+            init();
+        });
+}
+
+function createRole(roleTitle, roleSalary, depIDArr) {
+    console.log('Inserting a new role...\n');
+
+    connection.query('INSERT INTO roles SET ?',
+        {
+            title: `${roleTitle}`,
+            salary: `${roleSalary}`,
+            department_id: `${depIDArr}`,
+        },
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} role inserted!\n`);
+        // Call updateProduct AFTER the INSERT completes
+        // updateDept(dept);
+
+        // push to roleArr
         init();
       }
     );

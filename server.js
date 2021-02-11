@@ -29,7 +29,7 @@ const initialPrompt = [
 ];
 
 
-roleArr = [];
+let roleArr = [];
 function readRoles() {
     console.log('Selecting titles roles...\n');
     connection.query('SELECT title FROM roles', (err, res) => {
@@ -147,20 +147,28 @@ function init(){
 //         });
 // }
 let roleID = []
-function poop(){
-    connection.query('SELECT * FROM roles', (err, res) => {
-    if (err) throw err;
-    let poop = JSON.parse(JSON.stringify(res));
-   
-    for (let i = 0; i < poop.length; i++){
-        if ("Sales Lead" == poop[i].title){
-            roleID.push(poop[i].department_id)
-           
-        }
-        
-    }
+let depIDArr = 0;
 
-        console.log("he", roleID)
+function poop(){
+    // connection.query('SELECT * FROM roles', (err, res) => {
+    // if (err) throw err;
+    // let poop = JSON.parse(JSON.stringify(res));
+   
+    // for (let i = 0; i < poop.length; i++){
+    //     if ("Sales Lead" == poop[i].title){
+    //         roleID.push(poop[i].department_id)
+           
+    //     }
+        
+    // }
+
+    connection.query(`SELECT * FROM roles WHERE title = "Sales Lead"`, (err, res) => {
+        if (err) throw err;
+        let poop = JSON.parse(JSON.stringify(res));
+
+        depIDArr = depIDArr += poop[0].department_id;
+
+        console.log("he", depIDArr)
 
         // console.log(poop[0].title)
 
@@ -170,7 +178,7 @@ function poop(){
   });
 }
 
-let depIDArr = [];
+
 let randomShit = [];
 function addEmployee(){
     // console.log(typeof roleArr);
@@ -207,20 +215,29 @@ function addEmployee(){
             const lastName = response.lastName;
             let roleID = response.role;
             let managerID = response.manager;
-            
+            // depIDArr = 0;
+            yoMom(roleID, depIDArr);
             // randomShit.push(roleID);
+            function yoMom(roleID, depIDArr){
+                connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
+                    if (err) throw err;
+                    let poop = JSON.parse(JSON.stringify(res));
+            
+                    depIDArr = parseInt(poop[0].department_id);
+                    // res[0].department_id
+            
+                    console.log("he", poop[0].department_id)
 
-            connection.query('SELECT * FROM roles', (err, res) => {
-                if (err) throw err;
-                let poop = JSON.parse(JSON.stringify(res));
+                    // return depIDArr;
+            
+                    // console.log(poop[0].title)
+            
                 
-                for (let i = 0; i < poop.length; i++){
-                    if (roleID == poop[i].title){
-                        depIDArr.push(poop[i].department_id);
-                    }
-                }
                 
+            
               });
+            }
+            
 
 
 
@@ -326,7 +343,7 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
     );
     }
     // logs the actual query being run
-    console.log(query.sql);
+    // console.log(query.sql);
   };
 
 

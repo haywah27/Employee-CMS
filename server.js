@@ -31,7 +31,7 @@ const initialPrompt = [
 
 roleArr = [];
 function readRoles() {
-    console.log('Selecting all employees...\n');
+    console.log('Selecting titles roles...\n');
     connection.query('SELECT title FROM roles', (err, res) => {
       if (err) throw err;
       var roles = res.map(function(item){
@@ -146,11 +146,37 @@ function init(){
 //             readEmployee();
 //         });
 // }
+let roleID = []
+function poop(){
+    connection.query('SELECT * FROM roles', (err, res) => {
+    if (err) throw err;
+    let poop = JSON.parse(JSON.stringify(res));
+   
+    for (let i = 0; i < poop.length; i++){
+        if ("Sales Lead" == poop[i].title){
+            roleID.push(poop[i].department_id)
+           
+        }
+        
+    }
 
+        console.log("he", roleID)
 
+        // console.log(poop[0].title)
+
+    
+    
+
+  });
+}
+
+let depIDArr = [];
+let randomShit = [];
 function addEmployee(){
     // console.log(typeof roleArr);
     readRoles();
+    // poop()
+    
     inquirer.prompt([{
         type: "input",
         message: "What is their first name?",
@@ -171,7 +197,7 @@ function addEmployee(){
       {
         type: "list",
         message: "Who is their manager?",
-        choices: ["Hayley", "Billie", "Aspen",],
+        choices: ["None", "Hayley", "Billie", "Aspen",],
         name: "manager"
       }]).then(
         response => {
@@ -179,8 +205,25 @@ function addEmployee(){
             console.log(response);
             const firstName = response.firstName;
             const lastName = response.lastName;
-            const roleID = response.role;
+            let roleID = response.role;
             let managerID = response.manager;
+            
+            // randomShit.push(roleID);
+
+            connection.query('SELECT * FROM roles', (err, res) => {
+                if (err) throw err;
+                let poop = JSON.parse(JSON.stringify(res));
+                
+                for (let i = 0; i < poop.length; i++){
+                    if (roleID == poop[i].title){
+                        depIDArr.push(poop[i].department_id);
+                    }
+                }
+                
+              });
+
+
+
 
             if (managerID === "Hayley"){
                 managerID = 1;
@@ -192,7 +235,7 @@ function addEmployee(){
                 managerID = "NULL";
             }
 
-            createEmployee(firstName, lastName, roleID, managerID);
+            createEmployee(firstName, lastName, depIDArr, managerID);
             init();
         });
 }
@@ -245,7 +288,7 @@ const viewRoles = () => {
     });
 };
 
-const createEmployee = (firstName, lastName, roleID, managerID) => {
+const createEmployee = (firstName, lastName, depIDArr, managerID) => {
     console.log('Inserting a new employee...\n');
     if (managerID === "NULL"){
 
@@ -253,13 +296,13 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
         {
           first_name: `${firstName}`,
           last_name: `${lastName}`,
-          role_id: `${roleID}`,
+          role_id: `${depIDArr}`,
         },
         (err, res) => {
           if (err) throw err;
           console.log(`${res.affectedRows} employee inserted!\n`);
           // Call updateProduct AFTER the INSERT completes
-          updateEmployee(firstName, lastName, roleID, managerID);
+          updateEmployee(firstName, lastName, depIDArr, managerID);
           init();
         }
       );
@@ -270,14 +313,14 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
       {
         first_name: `${firstName}`,
         last_name: `${lastName}`,
-        role_id: `${roleID}`,
+        role_id: `${depIDArr}`,
         manager_id: `${managerID}`,
       },
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee inserted!\n`);
         // Call updateProduct AFTER the INSERT completes
-        updateEmployee(firstName, lastName, roleID, managerID);
+        updateEmployee(firstName, lastName, depIDArr, managerID);
         init();
       }
     );
@@ -288,7 +331,7 @@ const createEmployee = (firstName, lastName, roleID, managerID) => {
 
 
 
-const updateEmployee = (firstName, lastName, roleID, managerID) => {
+const updateEmployee = (firstName, lastName, depIDArr, managerID) => {
     console.log('Updating new employee data...\n');
     const query = connection.query(
     'UPDATE employees SET ? WHERE ?',
@@ -300,7 +343,7 @@ const updateEmployee = (firstName, lastName, roleID, managerID) => {
             last_name: `${lastName}`,
         },
         {
-            role_ID: `${roleID}`,
+            role_ID: `${depIDArr}`,
         },
         {
             manager_ID: `${managerID}`,

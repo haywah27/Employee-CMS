@@ -28,6 +28,28 @@ const initialPrompt = [
     }
 ];
 
+
+
+const readRoles = () => {
+    console.log('Selecting all employees...\n');
+    connection.query('SELECT title FROM roles', (err, res) => {
+      if (err) throw err;
+
+      var roles = res.map(function(item){
+          return item['title']
+      })
+
+        // var result = JSON.parse(JSON.stringify(res))
+
+    //   let poop = 
+      roleArr = roles;
+
+      console.log(roleArr);
+    });
+  };
+
+
+
 const employeeData = [
     {
         type: "input",
@@ -48,11 +70,13 @@ const employeeData = [
       {
         type: "list",
         message: "Who is their manager?",
-        choices: ["None", "Billie", "yo momma", "Beyonce"],
+        choices: ["Hayley", "Billie", "Aspen",],
         name: "manager"
       }
 ];
 
+
+// "Billie", "Hayley", "Oscar", "Aspen"
 const departData = [
     {
         type: "input",
@@ -76,8 +100,10 @@ const roleData = [
 
 
 function init(){
+   
     inquirer.prompt(initialPrompt).then(
         response => {
+            
             console.log("you chose the option: ", response.initPrompt);
             switch (response.initPrompt) {
                 case ("View All Employees"):
@@ -119,18 +145,18 @@ function init(){
 function addEmployee(){
     inquirer.prompt(employeeData).then(
         response => {
+            
             console.log(response);
             const firstName = response.firstName;
             const lastName = response.lastName;
-            const role = response.role;
-            const manager = response.manager;
+            const roleID = response.role;
+            let managerID = response.manager;
 
-            let managerID;
-            if (manager === "Billie"){
+            if (managerID === "Hayley"){
                 managerID = 1;
-            } else if (manager === "yo momma"){
-                managerI = 2;
-            } else if (manager === "Beyonce"){
+            } else if (managerID === "Billie"){
+                managerID = 2;
+            } else if (managerID === "Aspen"){
                 managerID = 3;
             } else {
                 managerID = "NULL";
@@ -158,7 +184,7 @@ function addDepartment(){
 
 const viewEmployees = () => {
   console.log('Selecting all employees...\n');
-  connection.query('SELECT * FROM employees', (err, res) => {
+  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
     console.table(res);

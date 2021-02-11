@@ -124,25 +124,6 @@ function addEmployee(){
             const lastName = response.lastName;
             const role = response.role;
             const manager = response.manager;
-            let roleID;
-            
-            if (role === "Sales Lead"){
-                roleID = 1;
-            } else if (role === "Salesperson"){
-                roleID = 2;
-            } else if (role === "Lead Engineer"){
-                roleID = 3;
-            } else if (role === "Software Engineer"){
-                roleID = 4;
-            } else if (role === "Accountant"){
-                roleID = 5;
-            } else if (role === "Legal Team Lead"){
-                roleID = 6;
-            } else if (role === "Lawyer"){
-                roleID = 7;
-            } else {
-                roleID = NULL;
-            }
 
             let managerID;
             if (manager === "Billie"){
@@ -199,7 +180,7 @@ const viewDepartments = () => {
 
 const viewRoles = () => {
     console.log('Selecting all roles...\n');
-    connection.query('SELECT * FROM roles', (err, res) => {
+    connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
       console.table(res);

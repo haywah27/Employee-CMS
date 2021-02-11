@@ -29,51 +29,57 @@ const initialPrompt = [
 ];
 
 
-
-const readRoles = () => {
+roleArr = [];
+function readRoles() {
     console.log('Selecting all employees...\n');
     connection.query('SELECT title FROM roles', (err, res) => {
       if (err) throw err;
-
       var roles = res.map(function(item){
-          return item['title']
-      })
+        return item['title']
+    })
+        for (let i = 0; i < roles.length; i++){
+            roleArr.push(roles[i]);
+        }
 
+        
+      return roleArr;
+        console.log(roleArr);
         // var result = JSON.parse(JSON.stringify(res))
 
     //   let poop = 
-      roleArr = roles;
+      
 
-      console.log(roleArr);
+    //   console.log(roleArr);
     });
   };
 
 
 
-const employeeData = [
-    {
-        type: "input",
-        message: "What is their first name?",
-        name: "firstName",
-      },
-      {
-        type: "input",
-        message: "What is their last name?",
-        name: "lastName",
-      },
-      {
-        type: "list",
-        message: "What is their role?",
-        choices: ["Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"],
-        name: "role",
-      },
-      {
-        type: "list",
-        message: "Who is their manager?",
-        choices: ["Hayley", "Billie", "Aspen",],
-        name: "manager"
-      }
-];
+// const employeeData = [
+//     {
+//         type: "input",
+//         message: "What is their first name?",
+//         name: "firstName",
+//       },
+//       {
+//         type: "input",
+//         message: "What is their last name?",
+//         name: "lastName",
+//       },
+//       {
+//         type: "list",
+//         message: "What is their role?",
+//         choices: readRoles(),
+//         name: "role",
+//       },
+//     //   "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"
+//       {
+//         type: "list",
+//         message: "Who is their manager?",
+//         choices: ["Hayley", "Billie", "Aspen",],
+//         name: "manager"
+//       }
+// ];
 
 
 // "Billie", "Hayley", "Oscar", "Aspen"
@@ -100,7 +106,7 @@ const roleData = [
 
 
 function init(){
-   
+    
     inquirer.prompt(initialPrompt).then(
         response => {
             
@@ -143,7 +149,31 @@ function init(){
 
 
 function addEmployee(){
-    inquirer.prompt(employeeData).then(
+    // console.log(typeof roleArr);
+    readRoles();
+    inquirer.prompt([{
+        type: "input",
+        message: "What is their first name?",
+        name: "firstName",
+      },
+      {
+        type: "input",
+        message: "What is their last name?",
+        name: "lastName",
+      },
+      {
+        type: "list",
+        message: "What is their role?",
+        choices: roleArr,
+        name: "role",
+      },
+    //   "Sales Lead", "Salesperson", "Lead Engineer", "Software Engineer", "Accountant", "Legal Team Lead", "Lawyer"
+      {
+        type: "list",
+        message: "Who is their manager?",
+        choices: ["Hayley", "Billie", "Aspen",],
+        name: "manager"
+      }]).then(
         response => {
             
             console.log(response);
@@ -184,7 +214,7 @@ function addDepartment(){
 
 const viewEmployees = () => {
   console.log('Selecting all employees...\n');
-  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
+  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_first_name FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
     console.table(res);

@@ -4,7 +4,7 @@ const inquirer = require("inquirer");
 const mainMenu = [
     {
         type: "list",
-        message: "Would you like to do?",
+        message: "What would you like to do?",
         choices: ["View All Employees", "View Departments", "View Roles", "Add Employee", "Add Department", "Add Role", "Update Employee", "Quit Application"],
         name: "initPrompt"
     }

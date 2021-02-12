@@ -5,6 +5,7 @@ const viewDepts = 'SELECT * FROM departments';
 const viewRoles = 'SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;';
 
 
+
 module.exports = {
     viewEmployees,
     viewDepts,

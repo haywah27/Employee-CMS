@@ -4,10 +4,6 @@ const cTable = require('console.table');
 const connection = require('./model/connection');
 const mainMenu = require('./view/init_quest');
 const read_DB = require('./model/readDB');
-// const empControl = require('./controller/employee');
-// const managerControl = require('./controller/manager');
-// const deptControl = require('./controller/department');
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,6 +14,7 @@ let roleArr = [];
 let depIDArr = 0;
 let deptArr = [];
 let employeeArr = [];
+const brkLines = "///////////////////////////////////////////////////////////////////////////////////////\n"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,9 +118,9 @@ const viewEmployees = () => {
     connection.query(read_DB.viewEmployees, (err, res) => {
         if (err) throw err;
         // Log all results of the SELECT statement
-        console.log("///////////////////////////////////////////////////////////////////////////////////////");
+        console.log(brkLines);
         console.table("\nEmployees", res);
-        console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
+        console.log(brkLines);
         init();
     });
 };
@@ -135,9 +132,9 @@ const viewEmployees = () => {
 const viewDepartments = () => {
     connection.query(read_DB.viewDepts, (err, res) => {
       if (err) throw err;
-      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      console.log(brkLines);
       console.table("\nDepartments", res);
-      console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
+      console.log(brkLines);
 
       init();
     });
@@ -150,9 +147,9 @@ const viewDepartments = () => {
 const viewRoles = () => {
     connection.query(read_DB.viewRoles, (err, res) => {
       if (err) throw err;
-      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      console.log(brkLines);
       console.table("\nRoles", res);
-      console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
+      console.log(brkLines);
       
       init();
     });
@@ -193,6 +190,7 @@ function addEmployee(){
             const lastName = response.lastName;
             let roleID = response.role;
             let managerID = response.manager;
+            console.log("man id", managerID)
 
             convertRoleToNum(roleID, depIDArr);
 
@@ -200,14 +198,14 @@ function addEmployee(){
                 connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                    console.log("roleValue", roleValueToDeptID)
+
                     depIDArr = roleValueToDeptID[0].id;
 
                     if (managerID === "Hayley Wahlroos"){
                         managerID = 1;
-                    } else if (managerID === "Billie Frames"){
+                    } else if (managerID === "Billie Thudds"){
                         managerID = 2;
-                    } else if (managerID === "Aspen Threads"){å
+                    } else if (managerID === "Aspen Threads"){
                         managerID = 3;
                     } else {
                         managerID = "NULL";
@@ -267,8 +265,10 @@ function addDepartment(){
         response => {
 
             const dept = response.newDepartment;
-
+            
             createDept(dept);
+            
+            console.log("\n", brkLines, "\n");
             init();
         });
 }
@@ -326,7 +326,8 @@ function addRole(){
                     createRole(roleTitle, roleSalary, depIDArr);
               });
             }
-            
+            console.log("\n", brkLines, "\n");
+
             init();
         });
 }
@@ -352,7 +353,7 @@ function createRole(roleTitle, roleSalary, depIDArr) {
 
 // get new employee role data
 function updateEmployee(){
-
+    
     inquirer.prompt(
         [
             {
@@ -368,7 +369,7 @@ function updateEmployee(){
                 name: "editRole",
             }
             
-        ])
+        ]) 
     .then(
         response => {
             const editName1 = response.editName;
@@ -412,7 +413,6 @@ function editRole(editName1, depIDArr){
 // Connect to the DB
 connection.connect((err) => {
   if (err) throw err;
-  console.log(`connected as id ${connection.threadId}\n`);
-  
+  console.log(`connected to mysql server as id ${connection.threadId}\n`);
   init();
 });

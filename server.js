@@ -214,18 +214,24 @@ function addEmployee(){
             } 
             
             function convertManToID(managerID, manID, deptID) {
+                if(managerID === "None"){
+                    manID = "NULL";
+                    createEmployee(firstName, lastName, deptID, manID);
+
+                } else {
+
                 let splitMan = managerID.split(" ");
                 firstNameMan = splitMan[0];
                 lastNameMan = splitMan[1];
 
                 connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
                     if (err) throw err;
+                    
                     let manValueToManID = JSON.parse(JSON.stringify(res));
                     manID = manValueToManID[0].id;
-                    
-                    
                     createEmployee(firstName, lastName, deptID, manID);
                 })
+            } 
                 
             }
            
@@ -427,10 +433,6 @@ function editRole(editName1, deptID){
 // view by manager
 // delete
 // view budget per department (salries combined)
-
-
-
-
 
 
 

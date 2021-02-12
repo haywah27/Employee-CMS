@@ -15,6 +15,8 @@ let deptID = 0;
 let deptArr = [];
 let manID = 0;
 let employeeArr = [];
+let managerArr = ["None"];
+
 const brkLines = "///////////////////////////////////////////////////////////////////////////////////////\n"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,15 +60,30 @@ function readDepts() {
 // read employee table
 
 function readEmployees(){
-    connection.query('SELECT CONCAT(first_name," ", last_name) AS Manager FROM employees', (err, res) => {
+    connection.query('SELECT CONCAT(first_name," ", last_name) AS Employee FROM employees', (err, res) => {
         if (err) throw err;
 
         const empFirst = res.map(function(item){
-            return item['Manager']
+            return item['Employee']
         });
         
         for (let i = 0; i < empFirst.length; i++){
             employeeArr.push(empFirst[i]) 
+        }
+    });
+};
+
+function readManagers(){
+    managerArr = ["None"];
+    connection.query('SELECT CONCAT(manager_first_name," ", manager_last_name) AS Manager FROM managers', (err, res) => {
+        if (err) throw err;
+
+        const manName = res.map(function(item){
+            return item['Manager']
+        });
+        
+        for (let i = 0; i < manName.length; i++){
+            managerArr.push(manName[i]) 
         }
     });
 };
@@ -79,6 +96,7 @@ function init(){
     readEmployees();
     readRoles();
     readDepts();
+    readManagers();
     
     inquirer.prompt(mainMenu).then(
         response => {
@@ -184,7 +202,7 @@ function addEmployee(){
       {
         type: "list",
         message: "Who is their manager?",
-        choices: ["None", "Hayley Wahlroos", "Billie Thudds", "Aspen Threads",],
+        choices: managerArr,
         name: "manager"
       }]).then(
         response => {

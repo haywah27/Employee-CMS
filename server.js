@@ -11,8 +11,9 @@ const read_DB = require('./model/readDB');
 // setting global variables
 
 let roleArr = [];
-let depIDArr = 0;
+let deptID = 0;
 let deptArr = [];
+let manID = 0;
 let employeeArr = [];
 const brkLines = "///////////////////////////////////////////////////////////////////////////////////////\n"
 
@@ -161,7 +162,8 @@ const viewRoles = () => {
 
 // get information about employee
 function addEmployee(){
-    depIDArr = 0;
+    deptID = 0;
+    manID = 0;
 
     inquirer.prompt([{
         type: "input",
@@ -191,41 +193,53 @@ function addEmployee(){
             let roleID = response.role;
             let managerID = response.manager;
             console.log("man id", managerID)
+            convertRoleToNum(roleID, deptID);
 
-            convertRoleToNum(roleID, depIDArr);
-
-            function convertRoleToNum(roleID, depIDArr){
+            function convertRoleToNum(roleID, deptID){
                 connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
 
-                    depIDArr = roleValueToDeptID[0].id;
+                    deptID = roleValueToDeptID[0].id; 
 
-                    if (managerID === "Hayley Wahlroos"){
-                        managerID = 1;
-                    } else if (managerID === "Billie Thudds"){
-                        managerID = 2;
-                    } else if (managerID === "Aspen Threads"){
-                        managerID = 3;
-                    } else {
-                        managerID = "NULL";
-                    }
+                    
+                    // console.log("man arr", manID)
+                    
+                    console.log("dep arr", deptID)
+                // createEmployee(firstName, lastName, deptID, manID);
+                convertManToID(managerID, manID, deptID)
+                init(); 
+              })
+              
+            } 
+            
+            function convertManToID(managerID, manID, deptID) {
+                let splitMan = managerID.split(" ");
+                firstNameMan = splitMan[0];
+                lastNameMan = splitMan[1];
 
-                    createEmployee(firstName, lastName, depIDArr, managerID);
-                    init();
-              });
-            }   
+                connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+                    if (err) throw err;
+                    let manValueToManID = JSON.parse(JSON.stringify(res));
+                    manID = manValueToManID[0].id;
+                    
+                    
+                    createEmployee(firstName, lastName, deptID, manID);
+                })
+                
+            }
+           
         });
 }
 
 // push information to mysql table
-const createEmployee = (firstName, lastName, depIDArr, managerID) => {
-    if (managerID === "NULL"){
+const createEmployee = (firstName, lastName, deptID, manID) => {
+    if (manID === "NULL"){
         connection.query('INSERT INTO employees SET ?',
         {
           first_name: `${firstName}`,
           last_name: `${lastName}`,
-          role_id: `${depIDArr}`,
+          role_id: `${deptID}`,
         },
         (err, res) => {
           if (err) throw err;
@@ -238,8 +252,8 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
         {
             first_name: `${firstName}`,
             last_name: `${lastName}`,
-            role_id: `${depIDArr}`,
-            manager_id: `${managerID}`,
+            role_id: `${deptID}`,
+            manager_id: `${manID}`,
         },
         (err, res) => {
             if (err) throw err;
@@ -316,14 +330,14 @@ function addRole(){
             const roleTitle = response.newRole;
             const roleSalary = response.newSalary;
             let roleID = response.roleDeptID;
-            findDeptID(roleID, depIDArr);
+            findDeptID(roleID, deptID);
 
-            function findDeptID(roleID, depIDArr){
+            function findDeptID(roleID, deptID){
                 connection.query(`SELECT * FROM departments WHERE department = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                    depIDArr = roleValueToDeptID[0].id;
-                    createRole(roleTitle, roleSalary, depIDArr);
+                    deptID = roleValueToDeptID[0].id;
+                    createRole(roleTitle, roleSalary, deptID);
               });
             }
             console.log("\n", brkLines, "\n");
@@ -333,12 +347,12 @@ function addRole(){
 }
 
 // push role data to mysql table
-function createRole(roleTitle, roleSalary, depIDArr) {
+function createRole(roleTitle, roleSalary, deptID) {
     connection.query('INSERT INTO roles SET ?',
         {
             title: `${roleTitle}`,
             salary: `${roleSalary}`,
-            department_id: `${depIDArr}`,
+            department_id: `${deptID}`,
         },
       (err, res) => {
         if (err) throw err;
@@ -374,14 +388,14 @@ function updateEmployee(){
         response => {
             const editName1 = response.editName;
             let roleID = response.editRole;
-            findDeptID(roleID, depIDArr);
+            findDeptID(roleID, deptID);
 
-            function findDeptID(roleID, depIDArr){
+            function findDeptID(roleID, deptID){
                 connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                    depIDArr = roleValueToDeptID[0].id;
-                    editRole(editName1, depIDArr);
+                    deptID = roleValueToDeptID[0].id;
+                    editRole(editName1, deptID);
                     init();
               });
             }   
@@ -389,7 +403,7 @@ function updateEmployee(){
 }
 
 // push new update to mysql table
-function editRole(editName1, depIDArr){
+function editRole(editName1, deptID){
     let split = editName1.split(" ");
     firstNameSplit = split[0];
     lastNameSplit = split[1];
@@ -397,7 +411,7 @@ function editRole(editName1, depIDArr){
       `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
       [
         {
-            role_id: `${depIDArr}`,
+            role_id: `${deptID}`,
         },
       ],
       (err, res) => {
@@ -408,6 +422,16 @@ function editRole(editName1, depIDArr){
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// update managers
+// view by manager
+// delete
+// view budget per department (salries combined)
+
+
+
+
+
 
 
 // Connect to the DB

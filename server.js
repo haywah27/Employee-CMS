@@ -1,31 +1,16 @@
-const mysql = require('mysql');
+
 const inquirer = require("inquirer");
 const cTable = require('console.table');
+const connection = require('./model/connection');
+const mainMenu = require('./view/init_quest');
+const read_DB = require('./model/readDB');
+// const empControl = require('./controller/employee');
+// const managerControl = require('./controller/manager');
+// const deptControl = require('./controller/department');
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-
-  // Be sure to update with your own MySQL password!
-  password: 'yourRootPassword',
-  database: 'company_hw',
-});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// initial questions
-
-const initialPrompt = [
-    {
-        type: "list",
-        message: "Would you like to do?",
-        choices: ["View All Employees", "View Departments", "View Roles", "Add Employee", "Add Department", "Add Role", "Update Employee", "Quit Application"],
-        name: "initPrompt"
-    }
-];
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // setting global variables
 
@@ -97,7 +82,7 @@ function init(){
     readRoles();
     readDepts();
     
-    inquirer.prompt(initialPrompt).then(
+    inquirer.prompt(mainMenu).then(
         response => {
             switch (response.initPrompt) {
                 case ("View All Employees"):
@@ -133,7 +118,7 @@ function init(){
 // view employees
 
 const viewEmployees = () => {
-    connection.query('SELECT employees.id AS ID, CONCAT(employees.first_name," ", employees.last_name) AS Employee, roles.title AS Title, departments.department AS Department, roles.salary AS Salary, CONCAT(managers.manager_first_name," ", managers.manager_last_name) AS Manager FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
+    connection.query(read_DB.viewEmployees, (err, res) => {
         if (err) throw err;
         // Log all results of the SELECT statement
         console.log("///////////////////////////////////////////////////////////////////////////////////////");
@@ -148,7 +133,7 @@ const viewEmployees = () => {
 // view departments
 
 const viewDepartments = () => {
-    connection.query('SELECT * FROM departments', (err, res) => {
+    connection.query(read_DB.viewDepts, (err, res) => {
       if (err) throw err;
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       console.table("\nDepartments", res);
@@ -163,7 +148,7 @@ const viewDepartments = () => {
 // view roles
 
 const viewRoles = () => {
-    connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
+    connection.query(read_DB.viewRoles, (err, res) => {
       if (err) throw err;
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       console.table("\nRoles", res);
@@ -209,10 +194,10 @@ function addEmployee(){
             let roleID = response.role;
             let managerID = response.manager;
 
-            converRoleToNum(roleID, depIDArr);
+            convertRoleToNum(roleID, depIDArr);
 
-            function converRoleToNum(roleID, depIDArr){
-                connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
+            function convertRoleToNum(roleID, depIDArr){
+                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
                     console.log("roleValue", roleValueToDeptID)
@@ -334,7 +319,7 @@ function addRole(){
             findDeptID(roleID, depIDArr);
 
             function findDeptID(roleID, depIDArr){
-                connection.query(("SELECT * FROM departments WHERE department = " + "'" + roleID + "'"), (err, res) => {
+                connection.query(`SELECT * FROM departments WHERE department = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
                     depIDArr = roleValueToDeptID[0].id;
@@ -391,7 +376,7 @@ function updateEmployee(){
             findDeptID(roleID, depIDArr);
 
             function findDeptID(roleID, depIDArr){
-                connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
+                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
                     depIDArr = roleValueToDeptID[0].id;
@@ -408,7 +393,7 @@ function editRole(editName1, depIDArr){
     firstNameSplit = split[0];
     lastNameSplit = split[1];
     connection.query(
-      'UPDATE employees SET ? WHERE first_name = ' + "'" + firstNameSplit + "'" + "AND last_name = " + "'" + lastNameSplit + "'",
+      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
       [
         {
             role_id: `${depIDArr}`,

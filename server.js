@@ -26,7 +26,6 @@ const initialPrompt = [
 
 let roleArr = [];
 function readRoles() {
-    console.log('Selecting titles roles...\n');
     connection.query('SELECT title FROM roles', (err, res) => {
         if (err) throw err;
 
@@ -37,8 +36,7 @@ function readRoles() {
         for (let i = 0; i < roles.length; i++){
             roleArr.push(roles[i]);
         }
-        // console.log("role.arr", roleArr)
-        return roleArr;
+        // return roleArr;
 
     });
 };
@@ -46,11 +44,12 @@ function readRoles() {
 
 
 function init(){
+    readEmployees();
+    readRoles();
+    readDepts();
     
     inquirer.prompt(initialPrompt).then(
         response => {
-            
-            console.log("you chose the option: ", response.initPrompt);
             switch (response.initPrompt) {
                 case ("View All Employees"):
                     viewEmployees();
@@ -83,12 +82,12 @@ function init(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const viewEmployees = () => {
-  console.log('Selecting all employees...\n');
+//   console.log('Selecting all employees...\n');
   connection.query('SELECT employees.id AS ID, CONCAT(employees.first_name," ", employees.last_name) AS Employee, roles.title AS Title, departments.department AS Department, roles.salary AS Salary, CONCAT(managers.manager_first_name," ", managers.manager_last_name) AS Manager FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
     if (err) throw err;
     // Log all results of the SELECT statement
     console.log("///////////////////////////////////////////////////////////////////////////////////////");
-    console.table("\n", res);
+    console.table("\nEmployees", res);
     console.log("///////////////////////////////////////////////////////////////////////////////////////");
     init();
   });
@@ -97,12 +96,12 @@ const viewEmployees = () => {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const viewDepartments = () => {
-    console.log('Selecting all departments...\n');
+    // console.log('Selecting all departments...\n');
     connection.query('SELECT * FROM departments', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
-      console.table("\n", res);
+      console.table("\nDepartments", res);
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       init();
     });
@@ -111,12 +110,12 @@ const viewDepartments = () => {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const viewRoles = () => {
-    console.log('Selecting all roles...\n');
+    // console.log('Selecting all roles...\n');
     connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
       if (err) throw err;
       // Log all results of the SELECT statement
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
-      console.table("\n", res);
+      console.table("\nRoles", res);
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       
       init();
@@ -127,7 +126,8 @@ const viewRoles = () => {
 
 let depIDArr = 0;
 function addEmployee(){
-    readRoles();
+    depIDArr = 0;
+    // readRoles();
 
     inquirer.prompt([{
         type: "input",
@@ -153,12 +153,12 @@ function addEmployee(){
       }]).then(
         response => {
             
-            console.log(response);
+            // console.log(response);
             const firstName = response.firstName;
             const lastName = response.lastName;
             let roleID = response.role;
             let managerID = response.manager;
-            console.log(typeof managerID)
+            // console.log(typeof managerID)
             converRoleToNum(roleID, depIDArr);
 
             function converRoleToNum(roleID, depIDArr){
@@ -168,7 +168,7 @@ function addEmployee(){
             
                     depIDArr = roleValueToDeptID[0].department_id;
             
-                    console.log("he", depIDArr)
+                    // console.log("he", depIDArr)
 
                     if (managerID === "Hayley Wahlroos"){
                         managerID = 1;
@@ -179,39 +179,39 @@ function addEmployee(){
                     } else {
                         managerID = "NULL";
                     }
-                    
+
                     createEmployee(firstName, lastName, depIDArr, managerID);
+                    init();
               });
             }
             
             
 
             console.log("man ID", managerID)
-            init();
+            
         });
 }
 
 
 const createEmployee = (firstName, lastName, depIDArr, managerID) => {
     console.log('Inserting a new employee...\n');
-    // if (managerID === "NULL"){
+    if (managerID === "NULL"){
 
-    //     connection.query('INSERT INTO employees SET ?',
-    //     {
-    //       first_name: `${firstName}`,
-    //       last_name: `${lastName}`,
-    //       role_id: `${depIDArr}`,
-    //     },
-    //     (err, res) => {
-    //       if (err) throw err;
-    //       console.log(`${res.affectedRows} employee inserted!\n`);
-    //       // Call updateProduct AFTER the INSERT completes
-    //     //   updateEmployee(firstName, lastName, depIDArr, managerID);
-    //       init();
-    //     }
-    //   );
+        connection.query('INSERT INTO employees SET ?',
+        {
+          first_name: `${firstName}`,
+          last_name: `${lastName}`,
+          role_id: `${depIDArr}`,
+        },
+        (err, res) => {
+          if (err) throw err;
+          console.log(`${res.affectedRows} employee inserted!\n`);
+
+          
+        }
+      );
   
-    // } else {
+    } else {
     
     connection.query('INSERT INTO employees SET ?',
       {
@@ -223,46 +223,15 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee inserted!\n`);
-        // Call updateProduct AFTER the INSERT completes
-        init();
+
+        
       }
     );
-    // }
+    }
     // logs the actual query being run
     // console.log(query.sql);
   };
 
-
-        // updateEmployee(firstName, lastName, depIDArr, managerID);
-
-// const updateEmployee = (firstName, lastName, depIDArr, managerID) => {
-//     console.log('Updating new employee data...\n');
-//     const query = connection.query(
-//     'UPDATE employees SET ? WHERE ?',
-//     [
-//         {
-//             first_name: `${firstName}`,
-//         },
-//         {
-//             last_name: `${lastName}`,
-//         },
-//         {
-//             role_ID: `${depIDArr}`,
-//         },
-//         {
-//             manager_ID: `${managerID}`,
-//         },
-//     ],
-//     (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} employee table updated!\n`);
-//         // Call deleteProduct AFTER the UPDATE completes
-//     }
-//     );
-
-//     // logs the actual query being run
-//     console.log(query.sql);
-// };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -275,17 +244,16 @@ function addDepartment(){
         }
     ]).then(
         response => {
-            console.log(response);
+
             const dept = response.newDepartment;
 
             createDept(dept);
-            // console.log(response.newDepartment);
-
+            init();
         });
 }
 
 function createDept(dept) {
-    console.log('Inserting a new department...\n');
+
 
     connection.query('INSERT INTO departments SET ?',
       {
@@ -294,9 +262,8 @@ function createDept(dept) {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} department inserted!\n`);
-        // Call updateProduct AFTER the INSERT completes
-        // updateDept(dept);
-        init();
+
+       
       }
     );
 }
@@ -305,7 +272,7 @@ function createDept(dept) {
 
 let deptArr = [];
 function readDepts() {
-    console.log('Selecting department names...\n');
+    // console.log('Selecting department names...\n');
     connection.query('SELECT department FROM departments', (err, res) => {
         if (err) throw err;
 
@@ -321,7 +288,7 @@ function readDepts() {
 
 
 function addRole(){
-    readDepts();
+    // readDepts();
     inquirer.prompt(
     [
         {
@@ -378,40 +345,17 @@ function createRole(roleTitle, roleSalary, depIDArr) {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} role inserted!\n`);
-        // Call updateProduct AFTER the INSERT completes
-        // updateDept(dept);
 
-        // push to roleArr
-        init();
       }
     );
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-// function readEmployees(){
-//     console.log('Selecting employee names...\n');
-//     connection.query('SELECT first_name FROM employees', (err, res) => {
-//         if (err) throw err;
-
-//         const empFirst = res.map(function(item){
-//             return item['first_name']
-//         });
-
-//         for (let i = 0; i < empFirst.length; i++){
-//             empArr.push(empFirst[i]);
-//         }
-
-//         return empArr;
-
-//     });
-// };
-
 let employeeArr = [];
 function readEmployees(){
         
-    console.log('Selecting employee names...\n');
+    // console.log('Selecting employee names...\n');
     connection.query('SELECT CONCAT(first_name," ", last_name) AS Manager FROM employees', (err, res) => {
         if (err) throw err;
 
@@ -420,52 +364,36 @@ function readEmployees(){
         });
         
         for (let i = 0; i < empFirst.length; i++){
-            // test.push(empFirst[i]);
+
             employeeArr.push(empFirst[i])
             
         }
-        console.log("employee.arr", employeeArr)
+        // console.log("employee.arr", employeeArr)
 
-        readRoles();
-        inquirer.prompt(
-            [
-                {
-                    type: "list",
-                    message: "Which employee would you like to edit?",
-                    choices: employeeArr,
-                    name: "editName",
-                },
-                {
-                    type: "list",
-                    message: "Which role are they moving to?",
-                    choices: roleArr,
-                    name: "editRole",
-                }
-                
-            ])
+        
     });
 };
 
+
+
 function updateEmployee(){
-   
-    readEmployees();
-    readRoles();
+
     inquirer.prompt(
-    [
-        {
-            type: "list",
-            message: "Which employee would you like to edit?",
-            choices: employeeArr,
-            name: "editName",
-        },
-        {
-            type: "list",
-            message: "Which role are they moving to?",
-            choices: roleArr,
-            name: "editRole",
-        }
-        
-    ])
+        [
+            {
+                type: "list",
+                message: "Which employee would you like to edit?",
+                choices: employeeArr,
+                name: "editName",
+            },
+            {
+                type: "list",
+                message: "Which role are they moving to?",
+                choices: roleArr,
+                name: "editRole",
+            }
+            
+        ])
 .then(
         response => {
 
@@ -483,10 +411,11 @@ function updateEmployee(){
             
                     console.log("dep ID", depIDArr)
                     editRole(editName1, depIDArr);
+                    init();
               });
             }
             
-            init();
+            
         });
  
 }
@@ -509,48 +438,16 @@ function editRole(editName1, depIDArr){
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee updated!\n`);
+        
       }
     ); 
+   
 }
-
-// const updateDept = (dept)  => {
-//     console.log('Updating new department data...\n');
-//     const query = connection.query(
-//     'UPDATE departments SET ?',
-//     [
-//         {
-//             department: `${dept}`,
-//         },
-//     ],
-//     (err, res) => {
-//         if (err) throw err;
-//         console.log(`${res.affectedRows} department table updated!\n`);
-//         // Call deleteProduct AFTER the UPDATE completes
-//     }
-//     );
-// }
-  
-
-// const deleteProduct = () => {
-//   console.log('Deleting all strawberry icecream...\n');
-//   connection.query(
-//     'DELETE FROM products WHERE?',
-//     {
-//       flavor: 'strawberry',
-//     },
-//     (err, res) => {
-//       if (err) throw err;
-//       console.log(`${res.affectedRows} products deleted!\n`);
-//       // Call readProducts AFTER the DELETE completes
-//       readProducts();
-//     }
-//   );
-// };
-
 
 // Connect to the DB
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}\n`);
+  
   init();
 });

@@ -107,7 +107,8 @@ VALUES ("Aspen", "Threads");
 SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;
 
 -- show employees with roles and department names instead of ID numbers
-SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, managers.manager_first_name 
+SELECT employees.id AS ID, CONCAT(employees.first_name," ", employees.last_name) AS Employee, roles.title, departments.department, roles.salary, CONCAT(managers.manager_first_name," ", managers.manager_last_name) AS Manager
 FROM employees INNER JOIN roles ON roles.id = employees.role_id
 INNER JOIN departments ON departments.id = roles.department_id
 LEFT JOIN managers ON managers.id = employees.manager_id;
+

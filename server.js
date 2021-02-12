@@ -12,7 +12,9 @@ const connection = mysql.createConnection({
   database: 'company_hw',
 });
 
-//////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// initial questions
 
 const initialPrompt = [
     {
@@ -23,8 +25,19 @@ const initialPrompt = [
     }
 ];
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// setting global variables
 
 let roleArr = [];
+let depIDArr = 0;
+let deptArr = [];
+let employeeArr = [];
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// read role table
+
 function readRoles() {
     connection.query('SELECT title FROM roles', (err, res) => {
         if (err) throw err;
@@ -36,12 +49,48 @@ function readRoles() {
         for (let i = 0; i < roles.length; i++){
             roleArr.push(roles[i]);
         }
-        // return roleArr;
 
     });
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// read department table
+
+function readDepts() {
+    connection.query('SELECT department FROM departments', (err, res) => {
+        if (err) throw err;
+
+        const depts = res.map(function(item){
+            return item['department']
+        });
+
+        for (let i = 0; i < depts.length; i++){
+            deptArr.push(depts[i]);
+        }
+    });
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// read employee table
+
+function readEmployees(){
+    connection.query('SELECT CONCAT(first_name," ", last_name) AS Manager FROM employees', (err, res) => {
+        if (err) throw err;
+
+        const empFirst = res.map(function(item){
+            return item['Manager']
+        });
+        
+        for (let i = 0; i < empFirst.length; i++){
+            employeeArr.push(empFirst[i]) 
+        }
+    });
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// main menu
 
 function init(){
     readEmployees();
@@ -76,47 +125,49 @@ function init(){
                     connection.end();
                     break;
             }
-           
         });
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// view employees
+
 const viewEmployees = () => {
-//   console.log('Selecting all employees...\n');
-  connection.query('SELECT employees.id AS ID, CONCAT(employees.first_name," ", employees.last_name) AS Employee, roles.title AS Title, departments.department AS Department, roles.salary AS Salary, CONCAT(managers.manager_first_name," ", managers.manager_last_name) AS Manager FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
-    if (err) throw err;
-    // Log all results of the SELECT statement
-    console.log("///////////////////////////////////////////////////////////////////////////////////////");
-    console.table("\nEmployees", res);
-    console.log("///////////////////////////////////////////////////////////////////////////////////////");
-    init();
-  });
+    connection.query('SELECT employees.id AS ID, CONCAT(employees.first_name," ", employees.last_name) AS Employee, roles.title AS Title, departments.department AS Department, roles.salary AS Salary, CONCAT(managers.manager_first_name," ", managers.manager_last_name) AS Manager FROM employees INNER JOIN roles ON roles.id = employees.role_id INNER JOIN departments ON departments.id = roles.department_id LEFT JOIN managers ON managers.id = employees.manager_id', (err, res) => {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        console.log("///////////////////////////////////////////////////////////////////////////////////////");
+        console.table("\nEmployees", res);
+        console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
+        init();
+    });
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// view departments
+
 const viewDepartments = () => {
-    // console.log('Selecting all departments...\n');
     connection.query('SELECT * FROM departments', (err, res) => {
       if (err) throw err;
-      // Log all results of the SELECT statement
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       console.table("\nDepartments", res);
-      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
+
       init();
     });
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// view roles
+
 const viewRoles = () => {
-    // console.log('Selecting all roles...\n');
     connection.query('SELECT roles.id, roles.title, roles.salary, departments.department FROM roles INNER JOIN departments ON departments.id = roles.department_id;', (err, res) => {
       if (err) throw err;
-      // Log all results of the SELECT statement
       console.log("///////////////////////////////////////////////////////////////////////////////////////");
       console.table("\nRoles", res);
-      console.log("///////////////////////////////////////////////////////////////////////////////////////");
+      console.log("///////////////////////////////////////////////////////////////////////////////////////\n");
       
       init();
     });
@@ -124,10 +175,11 @@ const viewRoles = () => {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let depIDArr = 0;
+// create new employee
+
+// get information about employee
 function addEmployee(){
     depIDArr = 0;
-    // readRoles();
 
     inquirer.prompt([{
         type: "input",
@@ -152,29 +204,25 @@ function addEmployee(){
         name: "manager"
       }]).then(
         response => {
-            
-            // console.log(response);
             const firstName = response.firstName;
             const lastName = response.lastName;
             let roleID = response.role;
             let managerID = response.manager;
-            // console.log(typeof managerID)
+
             converRoleToNum(roleID, depIDArr);
 
             function converRoleToNum(roleID, depIDArr){
                 connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-            
-                    depIDArr = roleValueToDeptID[0].department_id;
-            
-                    // console.log("he", depIDArr)
+                    console.log("roleValue", roleValueToDeptID)
+                    depIDArr = roleValueToDeptID[0].id;
 
                     if (managerID === "Hayley Wahlroos"){
                         managerID = 1;
                     } else if (managerID === "Billie Frames"){
                         managerID = 2;
-                    } else if (managerID === "Aspen Threads"){
+                    } else if (managerID === "Aspen Threads"){å
                         managerID = 3;
                     } else {
                         managerID = "NULL";
@@ -183,20 +231,13 @@ function addEmployee(){
                     createEmployee(firstName, lastName, depIDArr, managerID);
                     init();
               });
-            }
-            
-            
-
-            console.log("man ID", managerID)
-            
+            }   
         });
 }
 
-
+// push information to mysql table
 const createEmployee = (firstName, lastName, depIDArr, managerID) => {
-    console.log('Inserting a new employee...\n');
     if (managerID === "NULL"){
-
         connection.query('INSERT INTO employees SET ?',
         {
           first_name: `${firstName}`,
@@ -205,36 +246,31 @@ const createEmployee = (firstName, lastName, depIDArr, managerID) => {
         },
         (err, res) => {
           if (err) throw err;
-          console.log(`${res.affectedRows} employee inserted!\n`);
-
-          
+          console.log(`${res.affectedRows} employee inserted!\n`);  
         }
       );
   
     } else {
-    
-    connection.query('INSERT INTO employees SET ?',
-      {
-        first_name: `${firstName}`,
-        last_name: `${lastName}`,
-        role_id: `${depIDArr}`,
-        manager_id: `${managerID}`,
-      },
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} employee inserted!\n`);
-
-        
-      }
-    );
-    }
-    // logs the actual query being run
-    // console.log(query.sql);
+        connection.query('INSERT INTO employees SET ?',
+        {
+            first_name: `${firstName}`,
+            last_name: `${lastName}`,
+            role_id: `${depIDArr}`,
+            manager_id: `${managerID}`,
+        },
+        (err, res) => {
+            if (err) throw err;
+            console.log(`${res.affectedRows} employee inserted!\n`);
+        }
+    )};
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// create new department
+
+// get department data
 function addDepartment(){
     inquirer.prompt([
         {
@@ -252,9 +288,8 @@ function addDepartment(){
         });
 }
 
+// push data into mysql table
 function createDept(dept) {
-
-
     connection.query('INSERT INTO departments SET ?',
       {
         department: `${dept}`,
@@ -262,33 +297,16 @@ function createDept(dept) {
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} department inserted!\n`);
-
-       
       }
     );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-let deptArr = [];
-function readDepts() {
-    // console.log('Selecting department names...\n');
-    connection.query('SELECT department FROM departments', (err, res) => {
-        if (err) throw err;
+// create new role
 
-        const depts = res.map(function(item){
-            return item['department']
-        });
-
-        for (let i = 0; i < depts.length; i++){
-            deptArr.push(depts[i]);
-        }
-    });
-};
-
-
+// get role data
 function addRole(){
-    // readDepts();
     inquirer.prompt(
     [
         {
@@ -310,8 +328,6 @@ function addRole(){
 
     ]).then(
         response => {
-            
-            console.log(response);
             const roleTitle = response.newRole;
             const roleSalary = response.newSalary;
             let roleID = response.roleDeptID;
@@ -321,10 +337,7 @@ function addRole(){
                 connection.query(("SELECT * FROM departments WHERE department = " + "'" + roleID + "'"), (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-            
                     depIDArr = roleValueToDeptID[0].id;
-            
-                    console.log("he", depIDArr)
                     createRole(roleTitle, roleSalary, depIDArr);
               });
             }
@@ -333,9 +346,8 @@ function addRole(){
         });
 }
 
+// push role data to mysql table
 function createRole(roleTitle, roleSalary, depIDArr) {
-    console.log('Inserting a new role...\n');
-
     connection.query('INSERT INTO roles SET ?',
         {
             title: `${roleTitle}`,
@@ -351,31 +363,9 @@ function createRole(roleTitle, roleSalary, depIDArr) {
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// update employee 
 
-let employeeArr = [];
-function readEmployees(){
-        
-    // console.log('Selecting employee names...\n');
-    connection.query('SELECT CONCAT(first_name," ", last_name) AS Manager FROM employees', (err, res) => {
-        if (err) throw err;
-
-        const empFirst = res.map(function(item){
-            return item['Manager']
-        });
-        
-        for (let i = 0; i < empFirst.length; i++){
-
-            employeeArr.push(empFirst[i])
-            
-        }
-        // console.log("employee.arr", employeeArr)
-
-        
-    });
-};
-
-
-
+// get new employee role data
 function updateEmployee(){
 
     inquirer.prompt(
@@ -394,10 +384,8 @@ function updateEmployee(){
             }
             
         ])
-.then(
+    .then(
         response => {
-
-            console.log(response);
             const editName1 = response.editName;
             let roleID = response.editRole;
             findDeptID(roleID, depIDArr);
@@ -406,28 +394,19 @@ function updateEmployee(){
                 connection.query(("SELECT * FROM roles WHERE title = " + "'" + roleID + "'"), (err, res) => {
                     if (err) throw err;
                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-            
                     depIDArr = roleValueToDeptID[0].id;
-            
-                    console.log("dep ID", depIDArr)
                     editRole(editName1, depIDArr);
                     init();
               });
-            }
-            
-            
+            }   
         });
- 
 }
 
-
+// push new update to mysql table
 function editRole(editName1, depIDArr){
-    console.log('Updating employee...\n');
     let split = editName1.split(" ");
     firstNameSplit = split[0];
     lastNameSplit = split[1];
-    console.log("first name", firstNameSplit)
-    console.log("last name", lastNameSplit)
     connection.query(
       'UPDATE employees SET ? WHERE first_name = ' + "'" + firstNameSplit + "'" + "AND last_name = " + "'" + lastNameSplit + "'",
       [
@@ -438,11 +417,12 @@ function editRole(editName1, depIDArr){
       (err, res) => {
         if (err) throw err;
         console.log(`${res.affectedRows} employee updated!\n`);
-        
       }
     ); 
-   
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Connect to the DB
 connection.connect((err) => {

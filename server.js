@@ -108,11 +108,17 @@ function init(){
                 case ("View All Employees"):
                     viewEmployees();
                     break;
+                case ("View Managers"):
+                    viewManagers();
+                    break;
                 case ("View Departments"):
                     viewDepartments();
                     break;
                 case ("View Roles"):
                     viewRoles();
+                    break;
+                case ("Add Manager"):
+                    addManager();
                     break;
                 case ("Add Employee"):
                     addEmployee();
@@ -132,6 +138,21 @@ function init(){
             }
         });
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// view mqnqgers
+
+const viewManagers = () => {
+    connection.query(read_DB.viewMangrs, (err, res) => {
+      if (err) throw err;
+      console.log(brkLines);
+      console.table("\nManagers", res);
+      console.log(brkLines);
+
+      init();
+    });
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -183,112 +204,112 @@ const viewRoles = () => {
 // create new employee
 
 // get information about employee
-function addEmployee(){
-    deptID = 0;
-    manID = 0;
+// function addEmployee(){
+//     deptID = 0;
+//     manID = 0;
 
-    inquirer.prompt([{
-        type: "input",
-        message: "What is their first name?",
-        name: "firstName",
-      },
-      {
-        type: "input",
-        message: "What is their last name?",
-        name: "lastName",
-      },
-      {
-        type: "list",
-        message: "What is their role?",
-        choices: roleArr,
-        name: "role",
-      },
-      {
-        type: "list",
-        message: "Who is their manager?",
-        choices: managerArr,
-        name: "manager"
-      }]).then(
-        response => {
-            const firstName = response.firstName;
-            const lastName = response.lastName;
-            let roleID = response.role;
-            let managerID = response.manager;
-            console.log("man id", managerID)
-            convertRoleToNum(roleID, deptID);
+//     inquirer.prompt([{
+//         type: "input",
+//         message: "What is their first name?",
+//         name: "firstName",
+//       },
+//       {
+//         type: "input",
+//         message: "What is their last name?",
+//         name: "lastName",
+//       },
+//       {
+//         type: "list",
+//         message: "What is their role?",
+//         choices: roleArr,
+//         name: "role",
+//       },
+//       {
+//         type: "list",
+//         message: "Who is their manager?",
+//         choices: managerArr,
+//         name: "manager"
+//       }]).then(
+//         response => {
+//             const firstName = response.firstName;
+//             const lastName = response.lastName;
+//             let roleID = response.role;
+//             let managerID = response.manager;
+//             console.log("man id", managerID)
+//             convertRoleToNum(roleID, deptID);
 
-            function convertRoleToNum(roleID, deptID){
-                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
-                    if (err) throw err;
-                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+//             function convertRoleToNum(roleID, deptID){
+//                 connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+//                     if (err) throw err;
+//                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
 
-                    deptID = roleValueToDeptID[0].id; 
+//                     deptID = roleValueToDeptID[0].id; 
 
                     
-                    // console.log("man arr", manID)
+//                     // console.log("man arr", manID)
                     
-                    console.log("dep arr", deptID)
-                // createEmployee(firstName, lastName, deptID, manID);
-                convertManToID(managerID, manID, deptID)
-                init(); 
-              })
+//                     console.log("dep arr", deptID)
+//                 // createEmployee(firstName, lastName, deptID, manID);
+//                 convertManToID(managerID, manID, deptID)
+//                 init(); 
+//               })
               
-            } 
+//             } 
             
-            function convertManToID(managerID, manID, deptID) {
-                if(managerID === "None"){
-                    manID = "NULL";
-                    createEmployee(firstName, lastName, deptID, manID);
+//             function convertManToID(managerID, manID, deptID) {
+//                 if(managerID === "None"){
+//                     manID = "NULL";
+//                     createEmployee(firstName, lastName, deptID, manID);
 
-                } else {
+//                 } else {
 
-                let splitMan = managerID.split(" ");
-                firstNameMan = splitMan[0];
-                lastNameMan = splitMan[1];
+//                 let splitMan = managerID.split(" ");
+//                 firstNameMan = splitMan[0];
+//                 lastNameMan = splitMan[1];
 
-                connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
-                    if (err) throw err;
+//                 connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+//                     if (err) throw err;
                     
-                    let manValueToManID = JSON.parse(JSON.stringify(res));
-                    manID = manValueToManID[0].id;
-                    createEmployee(firstName, lastName, deptID, manID);
-                })
-            } 
+//                     let manValueToManID = JSON.parse(JSON.stringify(res));
+//                     manID = manValueToManID[0].id;
+//                     createEmployee(firstName, lastName, deptID, manID);
+//                 })
+//             } 
                 
-            }
+//             }
            
-        });
-}
+//         });
+// }
 
-// push information to mysql table
-const createEmployee = (firstName, lastName, deptID, manID) => {
-    if (manID === "NULL"){
-        connection.query('INSERT INTO employees SET ?',
-        {
-          first_name: `${firstName}`,
-          last_name: `${lastName}`,
-          role_id: `${deptID}`,
-        },
-        (err, res) => {
-          if (err) throw err;
-          console.log(`${res.affectedRows} employee inserted!\n`);  
-        }
-      );
+// // push information to mysql table
+// const createEmployee = (firstName, lastName, deptID, manID) => {
+//     if (manID === "NULL"){
+//         connection.query('INSERT INTO employees SET ?',
+//         {
+//           first_name: `${firstName}`,
+//           last_name: `${lastName}`,
+//           role_id: `${deptID}`,
+//         },
+//         (err, res) => {
+//           if (err) throw err;
+//           console.log(`${res.affectedRows} employee inserted!\n`);  
+//         }
+//       );
   
-    } else {
-        connection.query('INSERT INTO employees SET ?',
-        {
-            first_name: `${firstName}`,
-            last_name: `${lastName}`,
-            role_id: `${deptID}`,
-            manager_id: `${manID}`,
-        },
-        (err, res) => {
-            if (err) throw err;
-            console.log(`${res.affectedRows} employee inserted!\n`);
-        }
-    )};
-  };
+//     } else {
+//         connection.query('INSERT INTO employees SET ?',
+//         {
+//             first_name: `${firstName}`,
+//             last_name: `${lastName}`,
+//             role_id: `${deptID}`,
+//             manager_id: `${manID}`,
+//         },
+//         (err, res) => {
+//             if (err) throw err;
+//             console.log(`${res.affectedRows} employee inserted!\n`);
+//         }
+//     )};
+//   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -309,21 +330,22 @@ function addDepartment(){
             const dept = response.newDepartment;
             
             createDept(dept);
-            
-            console.log("\n", brkLines, "\n");
-            init();
+
+            console.log("\n", brkLines);
+            console.log(`New Department added!\n`);
+            init()
         });
+        
 }
 
-// push data into mysql table
+// // push data into mysql table
 function createDept(dept) {
     connection.query('INSERT INTO departments SET ?',
       {
         department: `${dept}`,
       },
       (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} department inserted!\n`);
+        if (err) throw err; 
       }
     );
 }
@@ -368,8 +390,9 @@ function addRole(){
                     createRole(roleTitle, roleSalary, deptID);
               });
             }
-            console.log("\n", brkLines, "\n");
 
+            console.log("\n", brkLines);
+            console.log(`New Role added!\n`);
             init();
         });
 }
@@ -384,106 +407,60 @@ function createRole(roleTitle, roleSalary, deptID) {
         },
       (err, res) => {
         if (err) throw err;
-        console.log(`${res.affectedRows} role inserted!\n`);
-
       }
     );
+    
+    
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// update employee 
-
-// get new employee role data
-function updateEmployee2(){
-    
-    inquirer.prompt(
-        [
-            {
-                type: "list",
-                message: "Which employee would you like to edit?",
-                choices: employeeArr,
-                name: "editName",
-            },
-            {
-                type: "list",
-                message: "Which role are they moving to?",
-                choices: roleArr,
-                name: "editRole",
-            },  
-        ]) 
-    .then(
+function addManager(){
+    inquirer.prompt([
+        {
+            type: "input",
+            message: "What is the first name of the new manager?",
+            name: "newManagerFirst"
+        },
+        {
+            type: "input",
+            message: "What is the last name of the new manager?",
+            name: "newManagerLast"
+        }
+    ]).then(
         response => {
-            const editName1 = response.editName;
-            let roleID = response.editRole;
-            findDeptID(roleID, deptID);
 
-            function findDeptID(roleID, deptID){
-                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
-                    if (err) throw err;
-                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                    deptID = roleValueToDeptID[0].id;
-                    editRole(editName1, deptID);
-                    init();
-              });
-            }   
+            const mangrFirst = response.newManagerFirst;
+            const mangrLast = response.newManagerLast;
+            
+            createMangr(mangrFirst, mangrLast);
+            
+            console.log("\n", brkLines);
+            console.log(`New manager added!\n`);
+            init();
         });
 }
 
-// push new update to mysql table
-function editRole(editName1, deptID){
-    let split = editName1.split(" ");
-    firstNameSplit = split[0];
-    lastNameSplit = split[1];
-    connection.query(
-      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
-      [
-        {
-            role_id: `${deptID}`,
-        },
-      ],
+// push data into mysql table
+function createMangr(mangrFirst, mangrLast) {
+    connection.query('INSERT INTO managers SET ?',
+      {
+        manager_first_name: `${mangrFirst}`,
+        manager_last_name: `${mangrLast}`,
+      },
       (err, res) => {
         if (err) throw err;
-        console.log(`${res.affectedRows} employee updated!\n`);
       }
-    ); 
+    );
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function editManage(editName1, manID) {
-    let split = editName1.split(" ");
-    firstNameSplit = split[0];
-    lastNameSplit = split[1];
-    connection.query(
-      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
-      [
-        {
-            manager_id: `${manID}`,
-        },
-      ],
-      (err, res) => {
-        if (err) throw err;
-        console.log(`${res.affectedRows} employee updated!\n`);
-      }
-    ); 
+// update employee 
 
-}
-
-// update managers
-// view by manager
-// delete
-// view budget per department (salries combined)
-
-
-
-
-
-
-
-
-
-
+// get new employee role and/ or manager data
 function updateEmployee(){
     
     inquirer.prompt(
@@ -528,7 +505,9 @@ function updateEmployee(){
                                 if (err) throw err;
                                 let roleValueToDeptID = JSON.parse(JSON.stringify(res));
                                 deptID = roleValueToDeptID[0].id;
-                                editRole(editName1, deptID);
+                                editRole(editName1, deptID)
+                                console.log("\n", brkLines);
+                                console.log(`${editName1} has been updated!\n`);
                                 init();
                           });
                         }   
@@ -551,6 +530,8 @@ function updateEmployee(){
                             if(managerID === "None"){
                                 manID = "NULL";
                                 editManage(editName1, manID);
+                                console.log("\n", brkLines);
+                                console.log(`${editName1} updated!\n`);
                                 init();           
                             } else {
             
@@ -563,7 +544,9 @@ function updateEmployee(){
                                 
                                 let manValueToManID = JSON.parse(JSON.stringify(res));
                                 manID = manValueToManID[0].id;
-                                editManage(editName1, manID);          
+                                editManage(editName1, manID);
+                                console.log("\n", brkLines);
+                                console.log(`${editName1} has been updated!\n`);        
                                 init();                 
                             })
                         } 
@@ -602,16 +585,19 @@ function updateEmployee(){
                                 let roleValueToDeptID = JSON.parse(JSON.stringify(res));
                                 deptID = roleValueToDeptID[0].id;
                                 editRole(editName1, deptID);
+
+                                console.log("\n", brkLines);
+                                console.log(`${editName1} has been updated!\n`);
                                 init();
                           });
                         }   
                     });
-                
+
                     function updateManager(managerID, manID) {
                         if(managerID === "None"){
                             manID = "NULL";
                             editManage(editName1, manID);
-                            init();           
+                                       
                         } else {
         
                         let splitMan = managerID.split(" ");
@@ -623,14 +609,14 @@ function updateEmployee(){
                             
                             let manValueToManID = JSON.parse(JSON.stringify(res));
                             manID = manValueToManID[0].id;
-                            editManage(editName1, manID);          
-                            init();                 
+                            editManage(editName1, manID);                         
                         })
                     } 
                         
                     } 
 
             } else {
+                console.log("\n", brkLines);
                 console.log("404 something went wrong, please try again");
                 init();
             }
@@ -638,113 +624,53 @@ function updateEmployee(){
         });
 }
 
-
-
-
-const testFunctMan = () => {
-   
-    inquirer.prompt(
-        [
-            {
-                type: "list",
-                message: "Who is their new manager?",
-                choices: managerArr,
-                name: "editManager",
-            },  
-        ]) 
-    .then(
-        response => {
-            let newManager = response.editManager;
-            findDeptID(roleID, manID);
-
-            function findDeptID(newManager, deptID){
-                connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
-                    if (err) throw err;
-                    
-                    let manValueToManID = JSON.parse(JSON.stringify(res));
-                    manID = manValueToManID[0].id;
-
-                    // editRole(editName1, deptID);
-                    init();
-              }); 
-            }   
-        });
-}
-
-
-
-
-
-
-const testFunct2 = (editName1, deptID) => {  
-    console.log("in test funct")
-    inquirer.prompt(
-    [
+// push new update to mysql table
+function editRole(editName1, deptID){
+    let split = editName1.split(" ");
+    firstNameSplit = split[0];
+    lastNameSplit = split[1];
+    connection.query(
+      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
+      [
         {
-            type: "list",
-            message: "Which role are they moving to?",
-            choices: roleArr,
-            name: "editRole",
-        },  
-    ]) 
-.then(
-    response => {
-        let roleID = response.editRole;
-        console.log("role id", roleID)
-        findDeptID(roleID, deptID);
-
-        function findDeptID(roleID, deptID){
-            connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
-                if (err) throw err;
-                let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                deptID = roleValueToDeptID[0].id;
-                console.log("dept id", deptID)
-                init();
-          });
-        }   
-    });
+            role_id: `${deptID}`,
+        },
+      ],
+      (err, res) => {
+        if (err) throw err;
+      }
+    ); 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-function updateEmployee3(){
-    
-    inquirer.prompt(
-        [
-            {
-                type: "list",
-                message: "Which employee would you like to edit?",
-                choices: employeeArr,
-                name: "editName",
-            },
-            {
-                type: "list",
-                message: "Which role are they moving to?",
-                choices: roleArr,
-                name: "editRole",
-            },  
-        ]) 
-    .then(
-        response => {
-            const editName1 = response.editName;
-            let roleID = response.editRole;
-            findDeptID(roleID, deptID);
-
-            function findDeptID(roleID, deptID){
-                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
-                    if (err) throw err;
-                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
-                    deptID = roleValueToDeptID[0].id;
-                    editRole(editName1, deptID);
-                    init();
-              });
-            }   
-        });
+function editManage(editName1, manID) {
+    let split = editName1.split(" ");
+    firstNameSplit = split[0];
+    lastNameSplit = split[1];
+    connection.query(
+      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
+      [
+        {
+            manager_id: `${manID}`,
+        },
+      ],
+      (err, res) => {
+        if (err) throw err;
+      }
+    ); 
 }
 
+// update managers
+// view by manager
+// delete
+// view budget per department (salries combined)
 
+
+function displayByManager(){
+
+}
 
 
 // Connect to the DB

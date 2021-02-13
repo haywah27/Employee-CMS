@@ -73,6 +73,10 @@ function readEmployees(){
     });
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// read manager table
+
 function readManagers(){
     managerArr = ["None"];
     connection.query('SELECT CONCAT(manager_first_name," ", manager_last_name) AS Manager FROM managers', (err, res) => {
@@ -390,7 +394,7 @@ function createRole(roleTitle, roleSalary, deptID) {
 // update employee 
 
 // get new employee role data
-function updateEmployee(){
+function updateEmployee2(){
     
     inquirer.prompt(
         [
@@ -405,8 +409,7 @@ function updateEmployee(){
                 message: "Which role are they moving to?",
                 choices: roleArr,
                 name: "editRole",
-            }
-            
+            },  
         ]) 
     .then(
         response => {
@@ -447,6 +450,26 @@ function editRole(editName1, deptID){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+function editManage(editName1, manID) {
+    let split = editName1.split(" ");
+    firstNameSplit = split[0];
+    lastNameSplit = split[1];
+    connection.query(
+      `UPDATE employees SET ? WHERE first_name = "${firstNameSplit}" AND last_name = "${lastNameSplit}"`,
+      [
+        {
+            manager_id: `${manID}`,
+        },
+      ],
+      (err, res) => {
+        if (err) throw err;
+        console.log(`${res.affectedRows} employee updated!\n`);
+      }
+    ); 
+
+}
+
 // update managers
 // view by manager
 // delete
@@ -454,9 +477,227 @@ function editRole(editName1, deptID){
 
 
 
+
+
+
+
+
+
+
+function updateEmployee(){
+    
+    inquirer.prompt(
+        [
+            {
+                type: "list",
+                message: "Which employee would you like to edit?",
+                choices: employeeArr,
+                name: "editName",
+            },
+            {
+                type: "list",
+                message: "What do they need updated?",
+                choices: ["Role", "Manager", "Both"],
+                name: "updateChoice",
+            },
+            
+        ]) 
+    .then(
+        response => {
+
+            const editName1 = response.editName;
+            let choice = response.updateChoice;
+
+            if (choice === "Role"){
+                inquirer.prompt(
+                    [
+                        {
+                            type: "list",
+                            message: "Which role are they moving to?",
+                            choices: roleArr,
+                            name: "editRole",
+                        },  
+                    ]) 
+                .then(
+                    response => {
+                        let roleID = response.editRole;
+                        findDeptID(roleID, deptID);
+            
+                        function findDeptID(roleID, deptID){
+                            connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+                                if (err) throw err;
+                                let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+                                deptID = roleValueToDeptID[0].id;
+                                editRole(editName1, deptID);
+                                init();
+                          });
+                        }   
+                    });
+
+            } else if (choice === "Manager"){
+                inquirer.prompt([
+                  {
+                    type: "list",
+                    message: "Who is their manager?",
+                    choices: managerArr,
+                    name: "manager"
+                  }
+                ]).then(
+                    response => {
+                        let managerID = response.manager;
+                        updateManager(managerID, manID);
+                        
+                        function updateManager(managerID, manID) {
+                            if(managerID === "None"){
+                                manID = "NULL";
+                                editManage(editName1, manID);
+                                init();           
+                            } else {
+            
+                            let splitMan = managerID.split(" ");
+                            firstNameMan = splitMan[0];
+                            lastNameMan = splitMan[1];
+            
+                            connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+                                if (err) throw err;
+                                
+                                let manValueToManID = JSON.parse(JSON.stringify(res));
+                                manID = manValueToManID[0].id;
+                                editManage(editName1, manID);          
+                                init();                 
+                            })
+                        } 
+                            
+                        } 
+                    }
+                )
+
+
+
+            } else if (choice === "Both"){
+                
+
+
+            } else {
+                console.log("404 something went wrong, please try again");
+                init();
+            }
+    
+        });
+}
+
+
+
+
+const testFunctMan = () => {
+   
+    inquirer.prompt(
+        [
+            {
+                type: "list",
+                message: "Who is their new manager?",
+                choices: managerArr,
+                name: "editManager",
+            },  
+        ]) 
+    .then(
+        response => {
+            let newManager = response.editManager;
+            findDeptID(roleID, manID);
+
+            function findDeptID(newManager, deptID){
+                connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+                    if (err) throw err;
+                    
+                    let manValueToManID = JSON.parse(JSON.stringify(res));
+                    manID = manValueToManID[0].id;
+
+                    // editRole(editName1, deptID);
+                    init();
+              }); 
+            }   
+        });
+}
+
+
+
+
+
+
+const testFunct2 = (editName1, deptID) => {  
+    console.log("in test funct")
+    inquirer.prompt(
+    [
+        {
+            type: "list",
+            message: "Which role are they moving to?",
+            choices: roleArr,
+            name: "editRole",
+        },  
+    ]) 
+.then(
+    response => {
+        let roleID = response.editRole;
+        console.log("role id", roleID)
+        findDeptID(roleID, deptID);
+
+        function findDeptID(roleID, deptID){
+            connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+                if (err) throw err;
+                let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+                deptID = roleValueToDeptID[0].id;
+                console.log("dept id", deptID)
+                init();
+          });
+        }   
+    });
+}
+
+
+
+
+
+function updateEmployee3(){
+    
+    inquirer.prompt(
+        [
+            {
+                type: "list",
+                message: "Which employee would you like to edit?",
+                choices: employeeArr,
+                name: "editName",
+            },
+            {
+                type: "list",
+                message: "Which role are they moving to?",
+                choices: roleArr,
+                name: "editRole",
+            },  
+        ]) 
+    .then(
+        response => {
+            const editName1 = response.editName;
+            let roleID = response.editRole;
+            findDeptID(roleID, deptID);
+
+            function findDeptID(roleID, deptID){
+                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+                    if (err) throw err;
+                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+                    deptID = roleValueToDeptID[0].id;
+                    editRole(editName1, deptID);
+                    init();
+              });
+            }   
+        });
+}
+
+
+
+
 // Connect to the DB
 connection.connect((err) => {
-  if (err) throw err;
-  console.log(`connected to mysql server as id ${connection.threadId}\n`);
-  init();
-});
+    if (err) throw err;
+    console.log(`connected to mysql server as id ${connection.threadId}\n`);
+    init();
+  });

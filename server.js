@@ -546,7 +546,7 @@ function updateEmployee(){
                     response => {
                         let managerID = response.manager;
                         updateManager(managerID, manID);
-                        
+
                         function updateManager(managerID, manID) {
                             if(managerID === "None"){
                                 manID = "NULL";
@@ -572,11 +572,63 @@ function updateEmployee(){
                     }
                 )
 
-
-
             } else if (choice === "Both"){
                 
-
+                inquirer.prompt(
+                    [
+                        {
+                            type: "list",
+                            message: "Which role are they moving to?",
+                            choices: roleArr,
+                            name: "editRole",
+                        }, 
+                        {
+                            type: "list",
+                            message: "Who is their manager?",
+                            choices: managerArr,
+                            name: "manager"
+                          } 
+                    ]) 
+                .then(
+                    response => {
+                        let roleID = response.editRole;
+                        let managerID = response.manager;
+                        updateManager(managerID, manID);
+                        findDeptID(roleID, deptID);
+            
+                        function findDeptID(roleID, deptID){
+                            connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+                                if (err) throw err;
+                                let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+                                deptID = roleValueToDeptID[0].id;
+                                editRole(editName1, deptID);
+                                init();
+                          });
+                        }   
+                    });
+                
+                    function updateManager(managerID, manID) {
+                        if(managerID === "None"){
+                            manID = "NULL";
+                            editManage(editName1, manID);
+                            init();           
+                        } else {
+        
+                        let splitMan = managerID.split(" ");
+                        firstNameMan = splitMan[0];
+                        lastNameMan = splitMan[1];
+        
+                        connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+                            if (err) throw err;
+                            
+                            let manValueToManID = JSON.parse(JSON.stringify(res));
+                            manID = manValueToManID[0].id;
+                            editManage(editName1, manID);          
+                            init();                 
+                        })
+                    } 
+                        
+                    } 
 
             } else {
                 console.log("404 something went wrong, please try again");

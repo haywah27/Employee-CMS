@@ -179,7 +179,6 @@ const viewDepartments = () => {
       console.log(brkLines);
       console.table("\nDepartments", res);
       console.log(brkLines);
-
       init();
     });
 };
@@ -194,7 +193,6 @@ const viewRoles = () => {
       console.log(brkLines);
       console.table("\nRoles", res);
       console.log(brkLines);
-      
       init();
     });
 };
@@ -204,112 +202,108 @@ const viewRoles = () => {
 // create new employee
 
 // get information about employee
-// function addEmployee(){
-//     deptID = 0;
-//     manID = 0;
+function addEmployee(){
+    deptID = 0;
+    manID = 0;
 
-//     inquirer.prompt([{
-//         type: "input",
-//         message: "What is their first name?",
-//         name: "firstName",
-//       },
-//       {
-//         type: "input",
-//         message: "What is their last name?",
-//         name: "lastName",
-//       },
-//       {
-//         type: "list",
-//         message: "What is their role?",
-//         choices: roleArr,
-//         name: "role",
-//       },
-//       {
-//         type: "list",
-//         message: "Who is their manager?",
-//         choices: managerArr,
-//         name: "manager"
-//       }]).then(
-//         response => {
-//             const firstName = response.firstName;
-//             const lastName = response.lastName;
-//             let roleID = response.role;
-//             let managerID = response.manager;
-//             console.log("man id", managerID)
-//             convertRoleToNum(roleID, deptID);
+    inquirer.prompt([{
+        type: "input",
+        message: "What is their first name?",
+        name: "firstName",
+      },
+      {
+        type: "input",
+        message: "What is their last name?",
+        name: "lastName",
+      },
+      {
+        type: "list",
+        message: "What is their role?",
+        choices: roleArr,
+        name: "role",
+      },
+      {
+        type: "list",
+        message: "Who is their manager?",
+        choices: managerArr,
+        name: "manager"
+      }]).then(
+        response => {
+            const firstName = response.firstName;
+            const lastName = response.lastName;
+            let roleID = response.role;
+            let managerID = response.manager;
 
-//             function convertRoleToNum(roleID, deptID){
-//                 connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
-//                     if (err) throw err;
-//                     let roleValueToDeptID = JSON.parse(JSON.stringify(res));
+            convertRoleToNum(roleID, deptID);
 
-//                     deptID = roleValueToDeptID[0].id; 
+            function convertRoleToNum(roleID, deptID){
+                connection.query(`SELECT * FROM roles WHERE title = "${roleID}"`, (err, res) => {
+                    if (err) throw err;
+                    let roleValueToDeptID = JSON.parse(JSON.stringify(res));
 
-                    
-//                     // console.log("man arr", manID)
-                    
-//                     console.log("dep arr", deptID)
-//                 // createEmployee(firstName, lastName, deptID, manID);
-//                 convertManToID(managerID, manID, deptID)
-//                 init(); 
-//               })
+                    deptID = roleValueToDeptID[0].id; 
+
+                    convertManToID(managerID, manID, deptID);
+
+                    console.log("\n", brkLines);
+                    console.log(`${firstName} ${lastName} added!\n`);
+                    init(); 
+                })
               
-//             } 
+            } 
             
-//             function convertManToID(managerID, manID, deptID) {
-//                 if(managerID === "None"){
-//                     manID = "NULL";
-//                     createEmployee(firstName, lastName, deptID, manID);
+            function convertManToID(managerID, manID, deptID) {
+                if(managerID === "None"){
+                    manID = "NULL";
 
-//                 } else {
+                    createEmployee(firstName, lastName, deptID, manID);
 
-//                 let splitMan = managerID.split(" ");
-//                 firstNameMan = splitMan[0];
-//                 lastNameMan = splitMan[1];
+                } else {
 
-//                 connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
-//                     if (err) throw err;
+                let splitMan = managerID.split(" ");
+                firstNameMan = splitMan[0];
+                lastNameMan = splitMan[1];
+
+                connection.query(`SELECT * FROM managers WHERE manager_first_name = "${firstNameMan}" AND manager_last_name = "${lastNameMan}"`, (err, res) => {
+                    if (err) throw err;
                     
-//                     let manValueToManID = JSON.parse(JSON.stringify(res));
-//                     manID = manValueToManID[0].id;
-//                     createEmployee(firstName, lastName, deptID, manID);
-//                 })
-//             } 
-                
-//             }
-           
-//         });
-// }
+                    let manValueToManID = JSON.parse(JSON.stringify(res));
+                    manID = manValueToManID[0].id;
 
-// // push information to mysql table
-// const createEmployee = (firstName, lastName, deptID, manID) => {
-//     if (manID === "NULL"){
-//         connection.query('INSERT INTO employees SET ?',
-//         {
-//           first_name: `${firstName}`,
-//           last_name: `${lastName}`,
-//           role_id: `${deptID}`,
-//         },
-//         (err, res) => {
-//           if (err) throw err;
-//           console.log(`${res.affectedRows} employee inserted!\n`);  
-//         }
-//       );
+                    createEmployee(firstName, lastName, deptID, manID);
+                })
+            }       
+        }    
+     });
+}
+
+// push information to mysql table
+const createEmployee = (firstName, lastName, deptID, manID) => {
+    if (manID === "NULL"){
+        connection.query('INSERT INTO employees SET ?',
+        {
+          first_name: `${firstName}`,
+          last_name: `${lastName}`,
+          role_id: `${deptID}`,
+        },
+        (err, res) => {
+          if (err) throw err;
+        }
+      );
   
-//     } else {
-//         connection.query('INSERT INTO employees SET ?',
-//         {
-//             first_name: `${firstName}`,
-//             last_name: `${lastName}`,
-//             role_id: `${deptID}`,
-//             manager_id: `${manID}`,
-//         },
-//         (err, res) => {
-//             if (err) throw err;
-//             console.log(`${res.affectedRows} employee inserted!\n`);
-//         }
-//     )};
-//   };
+    } else {
+        connection.query('INSERT INTO employees SET ?',
+        {
+            first_name: `${firstName}`,
+            last_name: `${lastName}`,
+            role_id: `${deptID}`,
+            manager_id: `${manID}`,
+        },
+        (err, res) => {
+            if (err) throw err;
+        }
+    )};
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,9 +327,8 @@ function addDepartment(){
 
             console.log("\n", brkLines);
             console.log(`New Department added!\n`);
-            init()
+            init();
         });
-        
 }
 
 // // push data into mysql table
@@ -408,12 +401,12 @@ function createRole(roleTitle, roleSalary, deptID) {
       (err, res) => {
         if (err) throw err;
       }
-    );
-    
-    
+    ); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// add manager
 
 function addManager(){
     inquirer.prompt([
@@ -456,7 +449,6 @@ function createMangr(mangrFirst, mangrLast) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 // update employee 
 
@@ -511,7 +503,8 @@ function updateEmployee(){
                                 init();
                           });
                         }   
-                    });
+                    }
+                );
 
             } else if (choice === "Manager"){
                 inquirer.prompt([
@@ -549,11 +542,9 @@ function updateEmployee(){
                                 console.log(`${editName1} has been updated!\n`);        
                                 init();                 
                             })
-                        } 
-                            
-                        } 
-                    }
-                )
+                        }    
+                    } 
+                })
 
             } else if (choice === "Both"){
                 
@@ -611,9 +602,8 @@ function updateEmployee(){
                             manID = manValueToManID[0].id;
                             editManage(editName1, manID);                         
                         })
-                    } 
-                        
-                    } 
+                    }      
+                } 
 
             } else {
                 console.log("\n", brkLines);
@@ -621,10 +611,12 @@ function updateEmployee(){
                 init();
             }
     
-        });
+        }
+    );
 }
 
 // push new update to mysql table
+
 function editRole(editName1, deptID){
     let split = editName1.split(" ");
     firstNameSplit = split[0];
@@ -644,6 +636,7 @@ function editRole(editName1, deptID){
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// update mysql manager table
 
 function editManage(editName1, manID) {
     let split = editName1.split(" ");
@@ -662,20 +655,10 @@ function editManage(editName1, manID) {
     ); 
 }
 
-// update managers
-// view by manager
-// delete
-// view budget per department (salries combined)
-
-
-function displayByManager(){
-
-}
-
 
 // Connect to the DB
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected to mysql server as id ${connection.threadId}\n`);
     init();
-  });
+});

@@ -27,7 +27,7 @@ npm node server
 You will be presented with a list of options in a choose your own adventure style app.
 
 ## Walkthrough
-Watch this [tutorial video](https://drive.google.com/file/d/17ch4HsgLECaRFdKFB4mhdyr2y7hA93Tz/view) for a deep look at how to develop a new team profile page as well as a demonstration of a command line invocation of Jest tests.
+Watch this [tutorial video](https://drive.google.com/file/d/17ch4HsgLECaRFdKFB4mhdyr2y7hA93Tz/view) for a deep look at how to use the app.
 
 ## Quick Example Walkthroughs
 ### View managers, employees, roles, or departments: <img src="./Assets/View_Choices.gif" alt="view">
